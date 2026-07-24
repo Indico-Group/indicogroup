@@ -77,20 +77,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Aldeia Mesa — Sistema de Gestão Comercial" },
+      {
+        name: "description",
+        content:
+          "Sistema profissional de gestão para o Bar e Restaurante Aldeia Mesa: vendas, caixa, estoque, financeiro e relatórios.",
+      },
+      { name: "author", content: "Dausse de Clune do Rosário" },
+      { property: "og:title", content: "Aldeia Mesa — Sistema de Gestão" },
+      {
+        property: "og:description",
+        content: "Controlo completo do Bar e Restaurante Aldeia Mesa.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
