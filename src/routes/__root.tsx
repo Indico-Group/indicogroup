@@ -82,16 +82,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Sistema profissional de gestão para o Bar e Restaurante Aldeia Mesa: vendas, caixa, estoque, financeiro e relatórios.",
+          "Sistema profissional de gestão para o Bar e Restaurante Aldeia Mesa: vendas, caixa, estoque, financeiro e relatórios.\nAutor: Dausse de Clune do Rosário",
       },
       { name: "author", content: "Dausse de Clune do Rosário" },
-      { property: "og:title", content: "Aldeia Mesa — Sistema de Gestão" },
+      { property: "og:title", content: "Aldeia Mesa — Sistema de Gestão Comercial" },
       {
         property: "og:description",
-        content: "Controlo completo do Bar e Restaurante Aldeia Mesa.",
+        content: "Sistema profissional de gestão para o Bar e Restaurante Aldeia Mesa: vendas, caixa, estoque, financeiro e relatórios.\nAutor: Dausse de Clune do Rosário",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Aldeia Mesa — Sistema de Gestão Comercial" },
+      { name: "twitter:description", content: "Sistema profissional de gestão para o Bar e Restaurante Aldeia Mesa: vendas, caixa, estoque, financeiro e relatórios.\nAutor: Dausse de Clune do Rosário" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/NfL26m3S3hRjxkckPQzQg8iPCJO2/social-images/social-1784924083629-1000744361.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/NfL26m3S3hRjxkckPQzQg8iPCJO2/social-images/social-1784924083629-1000744361.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
