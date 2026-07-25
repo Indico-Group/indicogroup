@@ -14,6 +14,147 @@ export type Database = {
   }
   public: {
     Tables: {
+      categorias: {
+        Row: {
+          cor: string | null
+          created_at: string
+          icone: string | null
+          id: string
+          is_active: boolean
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          icone?: string | null
+          id?: string
+          is_active?: boolean
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          icone?: string | null
+          id?: string
+          is_active?: boolean
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fornecedores: {
+        Row: {
+          contacto: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          morada: string | null
+          nome: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          contacto?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          morada?: string | null
+          nome: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contacto?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          morada?: string | null
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      produtos: {
+        Row: {
+          categoria_id: string | null
+          codigo: string | null
+          codigo_barras: string | null
+          created_at: string
+          descricao: string | null
+          estoque_atual: number
+          estoque_minimo: number
+          fornecedor_id: string | null
+          foto_url: string | null
+          id: string
+          is_active: boolean
+          lucro: number | null
+          nome: string
+          preco_compra: number
+          preco_venda: number
+          unidade: string
+          updated_at: string
+        }
+        Insert: {
+          categoria_id?: string | null
+          codigo?: string | null
+          codigo_barras?: string | null
+          created_at?: string
+          descricao?: string | null
+          estoque_atual?: number
+          estoque_minimo?: number
+          fornecedor_id?: string | null
+          foto_url?: string | null
+          id?: string
+          is_active?: boolean
+          lucro?: number | null
+          nome: string
+          preco_compra?: number
+          preco_venda?: number
+          unidade?: string
+          updated_at?: string
+        }
+        Update: {
+          categoria_id?: string | null
+          codigo?: string | null
+          codigo_barras?: string | null
+          created_at?: string
+          descricao?: string | null
+          estoque_atual?: number
+          estoque_minimo?: number
+          fornecedor_id?: string | null
+          foto_url?: string | null
+          id?: string
+          is_active?: boolean
+          lucro?: number | null
+          nome?: string
+          preco_compra?: number
+          preco_venda?: number
+          unidade?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "produtos_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
