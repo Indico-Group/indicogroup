@@ -80,6 +80,53 @@ export type Database = {
         }
         Relationships: []
       }
+      movimentos_estoque: {
+        Row: {
+          created_at: string
+          estoque_anterior: number
+          estoque_novo: number
+          id: string
+          motivo: string | null
+          produto_id: string
+          quantidade: number
+          referencia: string | null
+          tipo: Database["public"]["Enums"]["movimento_tipo"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          estoque_anterior: number
+          estoque_novo: number
+          id?: string
+          motivo?: string | null
+          produto_id: string
+          quantidade: number
+          referencia?: string | null
+          tipo: Database["public"]["Enums"]["movimento_tipo"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          estoque_anterior?: number
+          estoque_novo?: number
+          id?: string
+          motivo?: string | null
+          produto_id?: string
+          quantidade?: number
+          referencia?: string | null
+          tipo?: Database["public"]["Enums"]["movimento_tipo"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimentos_estoque_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       produtos: {
         Row: {
           categoria_id: string | null
@@ -237,6 +284,12 @@ export type Database = {
         | "garcom"
         | "cozinha"
         | "estoque"
+      movimento_tipo:
+        | "compra"
+        | "venda"
+        | "ajuste"
+        | "transferencia_entrada"
+        | "transferencia_saida"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -372,6 +425,13 @@ export const Constants = {
         "garcom",
         "cozinha",
         "estoque",
+      ],
+      movimento_tipo: [
+        "compra",
+        "venda",
+        "ajuste",
+        "transferencia_entrada",
+        "transferencia_saida",
       ],
     },
   },
