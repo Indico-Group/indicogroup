@@ -44,6 +44,48 @@ export type Database = {
         }
         Relationships: []
       }
+      clientes: {
+        Row: {
+          aniversario: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          morada: string | null
+          nif: string | null
+          nome: string
+          notas: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          aniversario?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          morada?: string | null
+          nif?: string | null
+          nome: string
+          notas?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aniversario?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          morada?: string | null
+          nif?: string | null
+          nome?: string
+          notas?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fornecedores: {
         Row: {
           contacto: string | null
@@ -262,6 +304,166 @@ export type Database = {
         }
         Relationships: []
       }
+      venda_itens: {
+        Row: {
+          created_at: string
+          desconto: number
+          id: string
+          nome_produto: string
+          preco_unitario: number
+          produto_id: string
+          quantidade: number
+          subtotal: number
+          venda_id: string
+        }
+        Insert: {
+          created_at?: string
+          desconto?: number
+          id?: string
+          nome_produto: string
+          preco_unitario: number
+          produto_id: string
+          quantidade: number
+          subtotal: number
+          venda_id: string
+        }
+        Update: {
+          created_at?: string
+          desconto?: number
+          id?: string
+          nome_produto?: string
+          preco_unitario?: number
+          produto_id?: string
+          quantidade?: number
+          subtotal?: number
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venda_itens_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venda_itens_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venda_pagamentos: {
+        Row: {
+          created_at: string
+          id: string
+          metodo: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia: string | null
+          valor: number
+          venda_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metodo: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia?: string | null
+          valor: number
+          venda_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia?: string | null
+          valor?: number
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venda_pagamentos_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendas: {
+        Row: {
+          acrescimo: number
+          cancelada_em: string | null
+          cliente_id: string | null
+          created_at: string
+          desconto: number
+          id: string
+          mesa: string | null
+          metodo_pagamento:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          numero: number
+          observacoes: string | null
+          paga_em: string | null
+          status: Database["public"]["Enums"]["venda_status"]
+          subtotal: number
+          tipo: Database["public"]["Enums"]["venda_tipo"]
+          total: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          acrescimo?: number
+          cancelada_em?: string | null
+          cliente_id?: string | null
+          created_at?: string
+          desconto?: number
+          id?: string
+          mesa?: string | null
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          numero?: number
+          observacoes?: string | null
+          paga_em?: string | null
+          status?: Database["public"]["Enums"]["venda_status"]
+          subtotal?: number
+          tipo?: Database["public"]["Enums"]["venda_tipo"]
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          acrescimo?: number
+          cancelada_em?: string | null
+          cliente_id?: string | null
+          created_at?: string
+          desconto?: number
+          id?: string
+          mesa?: string | null
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          numero?: number
+          observacoes?: string | null
+          paga_em?: string | null
+          status?: Database["public"]["Enums"]["venda_status"]
+          subtotal?: number
+          tipo?: Database["public"]["Enums"]["venda_tipo"]
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -290,6 +492,15 @@ export type Database = {
         | "ajuste"
         | "transferencia_entrada"
         | "transferencia_saida"
+      pagamento_metodo:
+        | "dinheiro"
+        | "mpesa"
+        | "emola"
+        | "pos"
+        | "transferencia"
+        | "misto"
+      venda_status: "aberta" | "paga" | "cancelada"
+      venda_tipo: "balcao" | "mesa" | "delivery"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -433,6 +644,16 @@ export const Constants = {
         "transferencia_entrada",
         "transferencia_saida",
       ],
+      pagamento_metodo: [
+        "dinheiro",
+        "mpesa",
+        "emola",
+        "pos",
+        "transferencia",
+        "misto",
+      ],
+      venda_status: ["aberta", "paga", "cancelada"],
+      venda_tipo: ["balcao", "mesa", "delivery"],
     },
   },
 } as const
