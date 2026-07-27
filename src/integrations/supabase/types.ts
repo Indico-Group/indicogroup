@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      caixa_movimentos: {
+        Row: {
+          created_at: string
+          id: string
+          motivo: string | null
+          referencia: string | null
+          sessao_id: string
+          tipo: Database["public"]["Enums"]["caixa_movimento_tipo"]
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          motivo?: string | null
+          referencia?: string | null
+          sessao_id: string
+          tipo: Database["public"]["Enums"]["caixa_movimento_tipo"]
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          motivo?: string | null
+          referencia?: string | null
+          sessao_id?: string
+          tipo?: Database["public"]["Enums"]["caixa_movimento_tipo"]
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caixa_movimentos_sessao_id_fkey"
+            columns: ["sessao_id"]
+            isOneToOne: false
+            referencedRelation: "caixa_sessoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      caixa_sessoes: {
+        Row: {
+          aberta_em: string
+          created_at: string
+          diferenca: number | null
+          fechada_em: string | null
+          id: string
+          observacoes_abertura: string | null
+          observacoes_fechamento: string | null
+          status: Database["public"]["Enums"]["caixa_status"]
+          updated_at: string
+          user_id: string
+          valor_abertura: number
+          valor_esperado: number | null
+          valor_fechamento: number | null
+        }
+        Insert: {
+          aberta_em?: string
+          created_at?: string
+          diferenca?: number | null
+          fechada_em?: string | null
+          id?: string
+          observacoes_abertura?: string | null
+          observacoes_fechamento?: string | null
+          status?: Database["public"]["Enums"]["caixa_status"]
+          updated_at?: string
+          user_id: string
+          valor_abertura?: number
+          valor_esperado?: number | null
+          valor_fechamento?: number | null
+        }
+        Update: {
+          aberta_em?: string
+          created_at?: string
+          diferenca?: number | null
+          fechada_em?: string | null
+          id?: string
+          observacoes_abertura?: string | null
+          observacoes_fechamento?: string | null
+          status?: Database["public"]["Enums"]["caixa_status"]
+          updated_at?: string
+          user_id?: string
+          valor_abertura?: number
+          valor_esperado?: number | null
+          valor_fechamento?: number | null
+        }
+        Relationships: []
+      }
       categorias: {
         Row: {
           cor: string | null
@@ -486,6 +575,8 @@ export type Database = {
         | "garcom"
         | "cozinha"
         | "estoque"
+      caixa_movimento_tipo: "entrada" | "saida" | "sangria" | "reforco"
+      caixa_status: "aberta" | "fechada"
       movimento_tipo:
         | "compra"
         | "venda"
@@ -637,6 +728,8 @@ export const Constants = {
         "cozinha",
         "estoque",
       ],
+      caixa_movimento_tipo: ["entrada", "saida", "sangria", "reforco"],
+      caixa_status: ["aberta", "fechada"],
       movimento_tipo: [
         "compra",
         "venda",
