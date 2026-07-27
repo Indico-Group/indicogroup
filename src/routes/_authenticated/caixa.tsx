@@ -373,7 +373,7 @@ function CaixaPage() {
       <FecharDialog
         open={openFechar} onOpenChange={setOpenFechar}
         onSubmit={(v) => fecharMut.mutate(v)} loading={fecharMut.isPending}
-        esperado={totais.esperado} sessao={sessaoAtual}
+        esperado={totais.esperado} sessao={sessaoAtual ?? null}
       />
     </div>
   );
