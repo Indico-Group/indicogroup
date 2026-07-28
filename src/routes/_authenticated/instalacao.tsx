@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, ShieldCheck } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, RefreshCw } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -62,13 +62,13 @@ function InstalacaoPage() {
       <PageHeader
         title="Verificação de Instalação"
         description="Auditoria da configuração base do sistema: administrador, permissões e triggers."
-        icon={ShieldCheck}
-      >
-        <Button onClick={() => refetch()} disabled={isFetching} variant="outline">
-          <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
-          Reexecutar
-        </Button>
-      </PageHeader>
+        actions={
+          <Button onClick={() => refetch()} disabled={isFetching} variant="outline">
+            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
+            Reexecutar
+          </Button>
+        }
+      />
 
       {error ? (
         <Alert variant="destructive">
