@@ -565,6 +565,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      verificar_instalacao: {
+        Args: never
+        Returns: {
+          detalhe: string
+          status: string
+          verificacao: string
+        }[]
+      }
     }
     Enums: {
       app_role:
