@@ -64,6 +64,7 @@ const gestao: Item[] = [
 
 const sistema: Item[] = [
   { title: "Configurações", url: "/configuracoes", icon: Settings },
+  { title: "Instalação", url: "/instalacao", icon: ShieldCheck },
   { title: "Backup", url: "/backup", icon: DatabaseBackup },
 ];
 
