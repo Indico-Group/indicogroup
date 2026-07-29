@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, XCircle, AlertTriangle, RefreshCw } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, RefreshCw, Wrench } from "lucide-react";
+import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { verificarInstalacao, type CheckRow } from "@/lib/instalacao.functions";
+import { corrigirInstalacao, verificarInstalacao, type CheckRow } from "@/lib/instalacao.functions";
 
 export const Route = createFileRoute("/_authenticated/instalacao")({
   head: () => ({
