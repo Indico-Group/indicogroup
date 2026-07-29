@@ -48,6 +48,8 @@ function StatusBadge({ status }: { status: string }) {
 
 function InstalacaoPage() {
   const run = useServerFn(verificarInstalacao);
+  const fix = useServerFn(corrigirInstalacao);
+  const qc = useQueryClient();
   const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["verificar-instalacao"],
     queryFn: () => run(),
@@ -58,16 +60,38 @@ function InstalacaoPage() {
   const pendentes = rows.filter((r) => r.status === "PENDENTE");
   const oks = rows.filter((r) => r.status === "OK");
 
+  const fixMutation = useMutation({
+    mutationFn: () => fix(),
+    onSuccess: async (result) => {
+      const linhas = (result ?? []).map((r) => `• ${r.accao}: ${r.resultado}`).join("\n");
+      toast.success("Correcções aplicadas", { description: linhas || "Sem acções." });
+      await qc.invalidateQueries({ queryKey: ["verificar-instalacao"] });
+    },
+    onError: (e: Error) => toast.error("Falha ao corrigir", { description: e.message }),
+  });
+
+  const precisaCorreccao = falhas.length > 0 || pendentes.length > 0;
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Verificação de Instalação"
         description="Auditoria da configuração base do sistema: administrador, permissões e triggers."
         actions={
-          <Button onClick={() => refetch()} disabled={isFetching} variant="outline">
-            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
-            Reexecutar
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => fixMutation.mutate()}
+              disabled={fixMutation.isPending || isFetching || !precisaCorreccao}
+              variant="default"
+            >
+              <Wrench className={`h-4 w-4 mr-2 ${fixMutation.isPending ? "animate-pulse" : ""}`} />
+              Corrigir automaticamente
+            </Button>
+            <Button onClick={() => refetch()} disabled={isFetching} variant="outline">
+              <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
+              Reexecutar
+            </Button>
+          </div>
         }
       />
 
