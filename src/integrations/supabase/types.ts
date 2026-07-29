@@ -558,6 +558,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      corrigir_instalacao: {
+        Args: never
+        Returns: {
+          accao: string
+          resultado: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
