@@ -175,6 +175,69 @@ export type Database = {
         }
         Relationships: []
       }
+      configuracoes: {
+        Row: {
+          email: string | null
+          id: number
+          iva_percent: number
+          logo_url: string | null
+          mensagem_recibo: string | null
+          moeda: string
+          morada: string | null
+          nif: string | null
+          nome_empresa: string
+          notificacoes_caixa: boolean
+          notificacoes_estoque: boolean
+          prefixo_recibo: string | null
+          rodape_recibo: string | null
+          telefone: string | null
+          tema: string
+          tempo_sessao_min: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          email?: string | null
+          id?: number
+          iva_percent?: number
+          logo_url?: string | null
+          mensagem_recibo?: string | null
+          moeda?: string
+          morada?: string | null
+          nif?: string | null
+          nome_empresa?: string
+          notificacoes_caixa?: boolean
+          notificacoes_estoque?: boolean
+          prefixo_recibo?: string | null
+          rodape_recibo?: string | null
+          telefone?: string | null
+          tema?: string
+          tempo_sessao_min?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          email?: string | null
+          id?: number
+          iva_percent?: number
+          logo_url?: string | null
+          mensagem_recibo?: string | null
+          moeda?: string
+          morada?: string | null
+          nif?: string | null
+          nome_empresa?: string
+          notificacoes_caixa?: boolean
+          notificacoes_estoque?: boolean
+          prefixo_recibo?: string | null
+          rodape_recibo?: string | null
+          telefone?: string | null
+          tema?: string
+          tempo_sessao_min?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       fornecedores: {
         Row: {
           contacto: string | null
