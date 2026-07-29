@@ -27,3 +27,16 @@ export const verificarInstalacao = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (data ?? []) as CheckRow[];
   });
+
+export type FixRow = { accao: string; resultado: string };
+
+export const corrigirInstalacao = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin.rpc("corrigir_instalacao" as any);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as FixRow[];
+  });
