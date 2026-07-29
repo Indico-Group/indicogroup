@@ -125,7 +125,6 @@ function ConfiguracoesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={Settings}
         title="Configurações"
         description="Preferências do sistema, dados da empresa e aparência"
         actions={
