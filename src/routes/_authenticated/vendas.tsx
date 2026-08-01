@@ -10,6 +10,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { pt } from "date-fns/locale";
 
 import { supabase } from "@/integrations/supabase/client";
+import { useEmpresa } from "@/hooks/use-empresa";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
