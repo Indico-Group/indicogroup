@@ -32,8 +32,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/logo";
+import { usePermissions } from "@/hooks/use-permissions";
+import { ROLE_LABELS } from "@/lib/permissions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
 
 type Item = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
 
