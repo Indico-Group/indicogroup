@@ -601,9 +601,9 @@ function CartPanel(props: {
         )}
 
         <div>
-          <Label className="text-xs">Cliente</Label>
+          <Label className="text-xs">Cliente (opcional)</Label>
           <Select value={clienteId} onValueChange={setClienteId}>
-            <SelectTrigger><SelectValue placeholder="Selecionar..." /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder="Sem cliente" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="nenhum">Sem cliente</SelectItem>
               {clientes.map((c) => (
