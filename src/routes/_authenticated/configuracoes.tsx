@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { RequireAccess } from "@/components/require-access";
 import { usePermissions } from "@/hooks/use-permissions";
 import { resolveLogoUrl, isExternalUrl } from "@/hooks/use-empresa";
 
