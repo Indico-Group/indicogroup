@@ -696,14 +696,25 @@ function CartPanel(props: {
 /* ============================ RECEIPT ============================ */
 
 function Receipt2({ venda, itens }: { venda: Venda; itens: CartItem[] }) {
+  const { config, logoUrl } = useEmpresa();
+  const nome = config?.nome_empresa ?? "Aldeia Mesa";
+  const prefixo = config?.prefixo_recibo ?? "AM";
+
   return (
     <div className="space-y-2 rounded-md border bg-card p-4 font-mono text-xs">
-      <div className="text-center">
-        <p className="text-sm font-bold">ALDEIA MESA</p>
+      <div className="space-y-1 text-center">
+        {logoUrl && (
+          <img src={logoUrl} alt={`Logotipo ${nome}`} className="mx-auto h-14 w-auto object-contain" />
+        )}
+        <p className="text-sm font-bold uppercase">{nome}</p>
+        {config?.nif && <p className="text-muted-foreground">NUIT: {config.nif}</p>}
+        {config?.morada && <p className="text-muted-foreground">{config.morada}</p>}
+        {config?.telefone && <p className="text-muted-foreground">{config.telefone}</p>}
         <p className="text-muted-foreground">Comprovante de venda</p>
+        {config?.mensagem_recibo && <p className="text-muted-foreground">{config.mensagem_recibo}</p>}
       </div>
       <Separator />
-      <div className="flex justify-between"><span>Nº</span><span>#{venda.numero}</span></div>
+      <div className="flex justify-between"><span>Nº</span><span>{prefixo}-{venda.numero}</span></div>
       <div className="flex justify-between">
         <span>Data</span>
         <span>{format(new Date(venda.created_at), "dd/MM/yy HH:mm")}</span>
@@ -724,10 +735,11 @@ function Receipt2({ venda, itens }: { venda: Venda; itens: CartItem[] }) {
       <div className="flex justify-between font-bold"><span>TOTAL</span><span>{formatMZN(venda.total)}</span></div>
       <div className="flex justify-between"><span>Pagamento</span><span className="capitalize">{venda.metodo_pagamento}</span></div>
       <Separator />
-      <p className="text-center text-muted-foreground">Obrigado pela preferência!</p>
+      <p className="text-center text-muted-foreground">{config?.rodape_recibo || "Obrigado pela preferência!"}</p>
     </div>
   );
 }
+
 
 /* =========================== HISTÓRICO =========================== */
 
