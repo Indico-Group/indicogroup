@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Logo } from "@/components/logo";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Entrar — Aldeia Mesa" },
@@ -103,7 +104,7 @@ function AuthPage() {
 
       <div className="relative w-full max-w-md">
         <div className="mb-6 flex justify-center">
-          <Logo size="lg" variant="light" />
+          <Logo size="lg" variant="light" staticOnly />
         </div>
 
         <Card className="border-white/10 bg-card/95 shadow-elegant backdrop-blur">

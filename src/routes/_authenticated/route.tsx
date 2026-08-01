@@ -1,9 +1,11 @@
-import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { RequireAccess } from "@/components/require-access";
+import { useEmpresa } from "@/hooks/use-empresa";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -20,6 +22,8 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
+  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const { config } = useEmpresa();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
@@ -37,7 +41,9 @@ function AuthenticatedLayout() {
           <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <span className="text-sm text-muted-foreground">Aldeia Mesa • Sistema de Gestão</span>
+              <span className="text-sm text-muted-foreground">
+                {config?.nome_empresa ?? "Aldeia Mesa"} • Sistema de Gestão
+              </span>
             </div>
             <div className="hidden items-center gap-3 sm:flex">
               <span className="text-xs text-muted-foreground">{email}</span>
@@ -47,10 +53,13 @@ function AuthenticatedLayout() {
             </div>
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8">
-            <Outlet />
+            <RequireAccess path={pathname}>
+              <Outlet />
+            </RequireAccess>
           </main>
         </div>
       </div>
     </SidebarProvider>
   );
 }
+

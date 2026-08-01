@@ -32,8 +32,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/logo";
+import { usePermissions } from "@/hooks/use-permissions";
+import { ROLE_LABELS } from "@/lib/permissions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
 
 type Item = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -73,6 +76,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const navigate = useNavigate();
+  const { can, roles } = usePermissions();
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 
@@ -82,25 +86,30 @@ export function AppSidebar() {
     navigate({ to: "/auth", replace: true });
   };
 
-  const renderGroup = (label: string, items: Item[]) => (
-    <SidebarGroup>
-      {!collapsed && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.url}>
-              <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                <Link to={item.url}>
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  );
+  const renderGroup = (label: string, items: Item[]) => {
+    const visible = items.filter((i) => can(i.url));
+    if (visible.length === 0) return null;
+    return (
+      <SidebarGroup>
+        {!collapsed && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {visible.map((item) => (
+              <SidebarMenuItem key={item.url}>
+                <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                  <Link to={item.url}>
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    );
+  };
+
 
   return (
     <Sidebar collapsible="icon">
@@ -119,7 +128,13 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
+        {!collapsed && roles.length > 0 && (
+          <p className="px-2 pb-1 text-[10px] uppercase tracking-wide text-sidebar-foreground/60">
+            {roles.map((r) => ROLE_LABELS[r]).join(" • ")}
+          </p>
+        )}
         <SidebarMenu>
+
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleLogout} tooltip="Sair">
               <LogOut className="h-4 w-4" />
