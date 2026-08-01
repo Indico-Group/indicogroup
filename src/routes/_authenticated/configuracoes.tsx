@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, Palette, Printer, Bell, Save, Loader2, Sun, Moon, Monitor } from "lucide-react";
+import { Building2, Palette, Printer, Bell, Save, Loader2, Sun, Moon, Monitor, ImagePlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { RequireAccess } from "@/components/require-access";
+import { usePermissions } from "@/hooks/use-permissions";
+import { resolveLogoUrl, isExternalUrl } from "@/hooks/use-empresa";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({
@@ -56,6 +59,8 @@ function applyTheme(t: string) {
 function ConfiguracoesPage() {
   const qc = useQueryClient();
   const [form, setForm] = useState<Config | null>(null);
+  const { canDo } = usePermissions();
+  const podeEditar = canDo("gerirConfiguracoes");
 
   const { data, isLoading } = useQuery({
     queryKey: ["configuracoes"],
@@ -102,6 +107,7 @@ function ConfiguracoesPage() {
     onSuccess: () => {
       toast.success("Configurações guardadas");
       qc.invalidateQueries({ queryKey: ["configuracoes"] });
+      qc.invalidateQueries({ queryKey: ["logo-url"] });
     },
     onError: (e: Error) => toast.error(e.message || "Erro ao guardar (verifique permissões)"),
   });
@@ -128,7 +134,7 @@ function ConfiguracoesPage() {
         title="Configurações"
         description="Preferências do sistema, dados da empresa e aparência"
         actions={
-          <Button onClick={() => save.mutate(form)} disabled={save.isPending}>
+          <Button onClick={() => save.mutate(form)} disabled={save.isPending || !podeEditar}>
             {save.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Guardar alterações
           </Button>
@@ -322,6 +328,102 @@ function ToggleRow({
         <div className="text-sm text-muted-foreground">{description}</div>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
+}
+
+function LogoUploader({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!value) {
+      setPreview(null);
+      return;
+    }
+    resolveLogoUrl(value).then((url) => {
+      if (!cancelled) setPreview(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [value]);
+
+  const handleFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Escolha um ficheiro de imagem (PNG, JPG ou SVG)");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("O logotipo não pode exceder 2 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("branding").upload(path, file, {
+        cacheControl: "3600",
+        upsert: true,
+        contentType: file.type,
+      });
+      if (error) throw error;
+      onChange(path);
+      toast.success("Logotipo carregado — guarde as alterações para aplicar");
+    } catch (e) {
+      toast.error((e as Error).message || "Falha no upload do logotipo");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <Label>Logotipo da empresa</Label>
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-lg border bg-muted/30">
+          {preview ? (
+            <img src={preview} alt="Pré-visualização do logotipo" className="h-full w-full object-contain" />
+          ) : (
+            <ImagePlus className="h-6 w-6 text-muted-foreground" />
+          )}
+        </div>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" disabled={uploading}>
+              <label className="cursor-pointer">
+                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+                {uploading ? "A carregar..." : "Carregar logotipo"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void handleFile(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </Button>
+            {value && (
+              <Button variant="ghost" size="sm" onClick={() => onChange(null)}>
+                <Trash2 className="mr-2 h-4 w-4" />Remover
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            PNG, JPG ou SVG até 2 MB. Aplicado no menu lateral, cabeçalho e recibos.
+          </p>
+          <Input
+            value={isExternalUrl(value) ? (value as string) : ""}
+            onChange={(e) => onChange(e.target.value.trim() || null)}
+            placeholder="Ou cole um URL https://..."
+            className="max-w-sm"
+          />
+        </div>
+      </div>
     </div>
   );
 }
