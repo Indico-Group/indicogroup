@@ -187,10 +187,9 @@ function ConfiguracoesPage() {
                 />
               </Field>
               <div className="md:col-span-2">
-                <Field label="URL do logotipo (opcional)">
-                  <Input value={form.logo_url ?? ""} onChange={(e) => update("logo_url", e.target.value)} placeholder="https://..." />
-                </Field>
+                <LogoUploader value={form.logo_url} onChange={(v) => update("logo_url", v)} />
               </div>
+
             </CardContent>
           </Card>
         </TabsContent>
