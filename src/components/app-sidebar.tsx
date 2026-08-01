@@ -128,7 +128,13 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
+        {!collapsed && roles.length > 0 && (
+          <p className="px-2 pb-1 text-[10px] uppercase tracking-wide text-sidebar-foreground/60">
+            {roles.map((r) => ROLE_LABELS[r]).join(" • ")}
+          </p>
+        )}
         <SidebarMenu>
+
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleLogout} tooltip="Sair">
               <LogOut className="h-4 w-4" />
