@@ -1010,7 +1010,21 @@ function Historico() {
               )}
             </div>
           )}
+          {detalhe && (
+            <DialogFooter className="gap-2 sm:gap-2">
+              <ReciboActions
+                venda={detalhe}
+                itens={itensDetalhe.map((it) => ({
+                  nome: it.nome_produto,
+                  quantidade: Number(it.quantidade),
+                  preco: Number(it.preco_unitario),
+                  subtotal: Number(it.subtotal),
+                }))}
+              />
+            </DialogFooter>
+          )}
         </DialogContent>
+
       </Dialog>
 
       <AlertDialog open={!!cancelar} onOpenChange={(o) => !o && setCancelar(null)}>
