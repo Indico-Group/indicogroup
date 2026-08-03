@@ -749,6 +749,67 @@ function Receipt2({ venda, itens }: { venda: Venda; itens: CartItem[] }) {
   );
 }
 
+/** Gera o recibo em PDF com os dados e o logotipo configurados na aba Empresa. */
+async function gerarRecibo(
+  venda: ReciboVenda,
+  itens: ReciboItem[],
+  acao: "pdf" | "print",
+) {
+  const empresa = await getEmpresaDoc();
+  const doc = criarReciboPdf(empresa, venda, itens);
+  if (acao === "print") imprimirPdf(doc);
+  else doc.save(nomeFicheiro(`recibo-${empresa.config?.prefixo_recibo ?? "AM"}-${venda.numero}`));
+}
+
+function ReciboActions({
+  venda, itens, clienteNome,
+}: {
+  venda: Venda;
+  itens: { nome: string; quantidade: number; preco: number; subtotal: number }[];
+  clienteNome?: string | null;
+}) {
+  const [busy, setBusy] = useState<"pdf" | "print" | null>(null);
+
+  const run = async (acao: "pdf" | "print") => {
+    setBusy(acao);
+    try {
+      await gerarRecibo(
+        {
+          numero: venda.numero,
+          created_at: venda.created_at,
+          tipo: venda.tipo,
+          mesa: venda.mesa,
+          status: venda.status,
+          metodo_pagamento: venda.metodo_pagamento,
+          subtotal: Number(venda.subtotal),
+          desconto: Number(venda.desconto),
+          acrescimo: Number(venda.acrescimo),
+          total: Number(venda.total),
+          observacoes: venda.observacoes,
+          cliente_nome: clienteNome ?? null,
+        },
+        itens,
+        acao,
+      );
+    } catch (e) {
+      toast.error((e as Error).message || "Falha ao gerar o recibo");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <>
+      <Button variant="outline" disabled={busy !== null} onClick={() => run("pdf")}>
+        <FileDown className="mr-2 h-4 w-4" />{busy === "pdf" ? "A gerar..." : "PDF"}
+      </Button>
+      <Button disabled={busy !== null} onClick={() => run("print")}>
+        <Printer className="mr-2 h-4 w-4" />{busy === "print" ? "A preparar..." : "Imprimir"}
+      </Button>
+    </>
+  );
+}
+
 
 /* =========================== HISTÓRICO =========================== */
 
