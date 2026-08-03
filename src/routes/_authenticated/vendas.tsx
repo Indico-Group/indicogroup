@@ -1054,7 +1054,61 @@ function Historico() {
   );
 }
 
+/** Exporta ou imprime o relatório da lista de vendas filtrada. */
+function RelatorioVendasActions({ vendas }: { vendas: Venda[] }) {
+  const [busy, setBusy] = useState<"pdf" | "print" | null>(null);
+
+  const run = async (acao: "pdf" | "print") => {
+    if (vendas.length === 0) {
+      toast.error("Sem vendas para exportar");
+      return;
+    }
+    setBusy(acao);
+    try {
+      const empresa = await getEmpresaDoc();
+      const cur = empresa.config?.moeda ?? "MZN";
+      const totalPagas = vendas.filter((v) => v.status === "paga").reduce((s, v) => s + Number(v.total), 0);
+      const doc = criarRelatorioPdf(empresa, {
+        titulo: "Relatório de Vendas",
+        subtitulo: `${vendas.length} registo(s)`,
+        colunas: ["Nº", "Data", "Tipo", "Mesa", "Pagamento", "Estado", "Total"],
+        linhas: vendas.map((v) => [
+          `#${v.numero}`,
+          format(new Date(v.created_at), "dd/MM/yyyy HH:mm"),
+          v.tipo,
+          v.mesa ?? "-",
+          v.metodo_pagamento ?? "-",
+          v.status,
+          moeda(Number(v.total), cur),
+        ]),
+        resumo: [
+          { label: "Total de vendas pagas", valor: moeda(totalPagas, cur) },
+          { label: "Registos apresentados", valor: String(vendas.length) },
+        ],
+      });
+      if (acao === "print") imprimirPdf(doc);
+      else doc.save(nomeFicheiro("relatorio-vendas"));
+    } catch (e) {
+      toast.error((e as Error).message || "Falha ao gerar o relatório");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run("pdf")}>
+        <FileDown className="mr-2 h-4 w-4" />Exportar PDF
+      </Button>
+      <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run("print")}>
+        <Printer className="mr-2 h-4 w-4" />Imprimir relatório
+      </Button>
+    </div>
+  );
+}
+
 function StatCard({
+
   label, value, sub, icon, tone,
 }: { label: string; value: string; sub?: string; icon?: React.ReactNode; tone?: "primary" | "destructive" }) {
   return (
