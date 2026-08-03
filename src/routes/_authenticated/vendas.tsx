@@ -530,12 +530,15 @@ function PDV() {
               <DialogTitle>Comprovante</DialogTitle>
             </DialogHeader>
             <Receipt2 venda={ultimaVenda.venda} itens={ultimaVenda.itens} />
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-2">
               <Button variant="outline" onClick={() => setUltimaVenda(null)}>Fechar</Button>
-              <Button onClick={() => window.print()}>
-                <Printer className="mr-2 h-4 w-4" />Imprimir
-              </Button>
+              <ReciboActions
+                venda={ultimaVenda.venda}
+                itens={ultimaVenda.itens}
+                clienteNome={clientes.find((c) => c.id === ultimaVenda.venda.cliente_id)?.nome ?? null}
+              />
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
       )}
