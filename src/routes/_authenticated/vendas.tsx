@@ -534,7 +534,13 @@ function PDV() {
               <Button variant="outline" onClick={() => setUltimaVenda(null)}>Fechar</Button>
               <ReciboActions
                 venda={ultimaVenda.venda}
-                itens={ultimaVenda.itens}
+                itens={ultimaVenda.itens.map((i) => ({
+                  nome: i.nome,
+                  quantidade: i.quantidade,
+                  preco: i.preco,
+                  subtotal: i.preco * i.quantidade - i.desconto,
+                }))}
+
                 clienteNome={clientes.find((c) => c.id === ultimaVenda.venda.cliente_id)?.nome ?? null}
               />
             </DialogFooter>
