@@ -93,81 +93,87 @@ export function criarReciboPdf(empresa: EmpresaDoc, venda: ReciboVenda, itens: R
   const cur = config?.moeda ?? "MZN";
   const W = 80;
   const M = 5;
-  const doc = new jsPDF({ unit: "mm", format: [W, 200] });
-  let y = 6;
 
-  if (logo) {
-    const maxW = 30;
-    const h = Math.min(20, (logo.height / logo.width) * maxW);
-    const w = (logo.width / logo.height) * h;
-    doc.addImage(logo.dataUrl, logo.format, (W - w) / 2, y, w, h);
-    y += h + 3;
-  }
+  /** Desenha o recibo e devolve a altura ocupada (mm). */
+  const render = (doc: jsPDF) => {
+    let y = 6;
 
-  const center = (text: string, size = 8, style: "normal" | "bold" = "normal", gap = 4) => {
-    doc.setFont("helvetica", style);
-    doc.setFontSize(size);
-    doc.text(doc.splitTextToSize(text, W - M * 2), W / 2, y, { align: "center" });
-    y += gap * doc.splitTextToSize(text, W - M * 2).length;
+    if (logo) {
+      const maxW = 30;
+      const h = Math.min(20, (logo.height / logo.width) * maxW);
+      const w = (logo.width / logo.height) * h;
+      doc.addImage(logo.dataUrl, logo.format, (W - w) / 2, y, w, h);
+      y += h + 3;
+    }
+
+    const center = (text: string, size = 8, style: "normal" | "bold" = "normal", gap = 4) => {
+      doc.setFont("helvetica", style);
+      doc.setFontSize(size);
+      const lines = doc.splitTextToSize(text, W - M * 2);
+      doc.text(lines, W / 2, y, { align: "center" });
+      y += gap * lines.length;
+    };
+    const line = () => {
+      doc.setDrawColor(180);
+      doc.line(M, y, W - M, y);
+      y += 3;
+    };
+    const row = (l: string, r: string, style: "normal" | "bold" = "normal", size = 8) => {
+      doc.setFont("helvetica", style);
+      doc.setFontSize(size);
+      doc.text(l, M, y);
+      doc.text(r, W - M, y, { align: "right" });
+      y += 4;
+    };
+
+    center(config?.nome_empresa ?? "Aldeia Mesa", 11, "bold", 5);
+    if (config?.nif) center(`NUIT: ${config.nif}`, 7);
+    if (config?.morada) center(config.morada, 7);
+    if (config?.telefone) center(config.telefone, 7);
+    if (config?.email) center(config.email, 7);
+    y += 1;
+    line();
+    center("COMPROVANTE DE VENDA", 9, "bold", 5);
+    if (config?.mensagem_recibo) center(config.mensagem_recibo, 7);
+    line();
+
+    row("Nº", `${config?.prefixo_recibo ?? "AM"}-${venda.numero}`, "bold");
+    row("Data", dataHora(new Date(venda.created_at)));
+    row("Tipo", venda.tipo);
+    if (venda.mesa) row("Mesa", venda.mesa);
+    row("Cliente", venda.cliente_nome?.trim() || "Consumidor final");
+    line();
+
+    for (const it of itens) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      const nameLines = doc.splitTextToSize(it.nome, W - M * 2);
+      doc.text(nameLines, M, y);
+      y += 4 * nameLines.length;
+      row(`${it.quantidade} x ${moeda(it.preco, cur)}`, moeda(it.subtotal, cur));
+    }
+    line();
+    row("Subtotal", moeda(venda.subtotal, cur));
+    if (venda.desconto) row("Desconto", `-${moeda(venda.desconto, cur)}`);
+    if (venda.acrescimo) row("Acréscimo", `+${moeda(venda.acrescimo, cur)}`);
+    row("TOTAL", moeda(venda.total, cur), "bold", 10);
+    if (venda.metodo_pagamento) row("Pagamento", venda.metodo_pagamento);
+    if (venda.status) row("Estado", venda.status);
+    line();
+    if (venda.observacoes) center(`Obs.: ${venda.observacoes}`, 7);
+    center(config?.rodape_recibo || "Obrigado pela preferência!", 8, "bold", 5);
+    center(`Emitido em ${dataHora()}`, 6);
+
+    return y;
   };
-  const line = () => {
-    doc.setDrawColor(180);
-    doc.line(M, y, W - M, y);
-    y += 3;
-  };
-  const row = (l: string, r: string, style: "normal" | "bold" = "normal", size = 8) => {
-    doc.setFont("helvetica", style);
-    doc.setFontSize(size);
-    doc.text(l, M, y);
-    doc.text(r, W - M, y, { align: "right" });
-    y += 4;
-  };
 
-  center(config?.nome_empresa ?? "Aldeia Mesa", 11, "bold", 5);
-  if (config?.nif) center(`NUIT: ${config.nif}`, 7);
-  if (config?.morada) center(config.morada, 7);
-  if (config?.telefone) center(config.telefone, 7);
-  if (config?.email) center(config.email, 7);
-  y += 1;
-  line();
-  center("COMPROVANTE DE VENDA", 9, "bold", 5);
-  if (config?.mensagem_recibo) center(config.mensagem_recibo, 7);
-  line();
-
-  row("Nº", `${config?.prefixo_recibo ?? "AM"}-${venda.numero}`, "bold");
-  row("Data", dataHora(new Date(venda.created_at)));
-  row("Tipo", venda.tipo);
-  if (venda.mesa) row("Mesa", venda.mesa);
-  row("Cliente", venda.cliente_nome?.trim() || "Consumidor final");
-  line();
-
-  for (const it of itens) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    const nameLines = doc.splitTextToSize(it.nome, W - M * 2);
-    doc.text(nameLines, M, y);
-    y += 4 * nameLines.length;
-    row(`${it.quantidade} x ${moeda(it.preco, cur)}`, moeda(it.subtotal, cur));
-  }
-  line();
-  row("Subtotal", moeda(venda.subtotal, cur));
-  if (venda.desconto) row("Desconto", `-${moeda(venda.desconto, cur)}`);
-  if (venda.acrescimo) row("Acréscimo", `+${moeda(venda.acrescimo, cur)}`);
-  row("TOTAL", moeda(venda.total, cur), "bold", 10);
-  if (venda.metodo_pagamento) row("Pagamento", venda.metodo_pagamento);
-  if (venda.status) row("Estado", venda.status);
-  line();
-  if (venda.observacoes) center(`Obs.: ${venda.observacoes}`, 7);
-  center(config?.rodape_recibo || "Obrigado pela preferência!", 8, "bold", 5);
-  center(`Emitido em ${dataHora()}`, 6);
-
-  // Ajusta a altura da página ao conteúdo.
-  const alturaFinal = Math.max(60, y + 6);
-  const size = doc.internal.pageSize as unknown as { height: number; getHeight: () => number };
-  size.height = alturaFinal;
+  // 1.ª passagem: medir a altura necessária; 2.ª: desenhar na página do tamanho exacto.
+  const altura = Math.max(60, render(new jsPDF({ unit: "mm", format: [W, 1000] })) + 6);
+  const doc = new jsPDF({ unit: "mm", format: [W, altura] });
+  render(doc);
   return doc;
-
 }
+
 
 /* =========================== RELATÓRIO =========================== */
 
