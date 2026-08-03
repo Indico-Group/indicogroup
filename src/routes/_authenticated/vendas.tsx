@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, Minus, Trash2, Search, ShoppingCart, Package, Receipt, X,
-  CheckCircle2, XCircle, Clock, Printer, User as UserIcon,
+  CheckCircle2, XCircle, Clock, Printer, User as UserIcon, FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow, format } from "date-fns";
@@ -11,6 +11,11 @@ import { pt } from "date-fns/locale";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useEmpresa } from "@/hooks/use-empresa";
+import {
+  getEmpresaDoc, criarReciboPdf, criarRelatorioPdf, imprimirPdf, nomeFicheiro, moeda,
+  type ReciboItem, type ReciboVenda,
+} from "@/lib/pdf";
+
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -525,12 +530,21 @@ function PDV() {
               <DialogTitle>Comprovante</DialogTitle>
             </DialogHeader>
             <Receipt2 venda={ultimaVenda.venda} itens={ultimaVenda.itens} />
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-2">
               <Button variant="outline" onClick={() => setUltimaVenda(null)}>Fechar</Button>
-              <Button onClick={() => window.print()}>
-                <Printer className="mr-2 h-4 w-4" />Imprimir
-              </Button>
+              <ReciboActions
+                venda={ultimaVenda.venda}
+                itens={ultimaVenda.itens.map((i) => ({
+                  nome: i.nome,
+                  quantidade: i.quantidade,
+                  preco: i.preco,
+                  subtotal: i.preco * i.quantidade - i.desconto,
+                }))}
+
+                clienteNome={clientes.find((c) => c.id === ultimaVenda.venda.cliente_id)?.nome ?? null}
+              />
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
       )}
@@ -741,6 +755,67 @@ function Receipt2({ venda, itens }: { venda: Venda; itens: CartItem[] }) {
   );
 }
 
+/** Gera o recibo em PDF com os dados e o logotipo configurados na aba Empresa. */
+async function gerarRecibo(
+  venda: ReciboVenda,
+  itens: ReciboItem[],
+  acao: "pdf" | "print",
+) {
+  const empresa = await getEmpresaDoc();
+  const doc = criarReciboPdf(empresa, venda, itens);
+  if (acao === "print") imprimirPdf(doc);
+  else doc.save(nomeFicheiro(`recibo-${empresa.config?.prefixo_recibo ?? "AM"}-${venda.numero}`));
+}
+
+function ReciboActions({
+  venda, itens, clienteNome,
+}: {
+  venda: Venda;
+  itens: { nome: string; quantidade: number; preco: number; subtotal: number }[];
+  clienteNome?: string | null;
+}) {
+  const [busy, setBusy] = useState<"pdf" | "print" | null>(null);
+
+  const run = async (acao: "pdf" | "print") => {
+    setBusy(acao);
+    try {
+      await gerarRecibo(
+        {
+          numero: venda.numero,
+          created_at: venda.created_at,
+          tipo: venda.tipo,
+          mesa: venda.mesa,
+          status: venda.status,
+          metodo_pagamento: venda.metodo_pagamento,
+          subtotal: Number(venda.subtotal),
+          desconto: Number(venda.desconto),
+          acrescimo: Number(venda.acrescimo),
+          total: Number(venda.total),
+          observacoes: venda.observacoes,
+          cliente_nome: clienteNome ?? null,
+        },
+        itens,
+        acao,
+      );
+    } catch (e) {
+      toast.error((e as Error).message || "Falha ao gerar o recibo");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <>
+      <Button variant="outline" disabled={busy !== null} onClick={() => run("pdf")}>
+        <FileDown className="mr-2 h-4 w-4" />{busy === "pdf" ? "A gerar..." : "PDF"}
+      </Button>
+      <Button disabled={busy !== null} onClick={() => run("print")}>
+        <Printer className="mr-2 h-4 w-4" />{busy === "print" ? "A preparar..." : "Imprimir"}
+      </Button>
+    </>
+  );
+}
+
 
 /* =========================== HISTÓRICO =========================== */
 
@@ -827,6 +902,10 @@ function Historico() {
         <StatCard label="Canceladas" value={String(stats.canceladas)} icon={<XCircle className="h-4 w-4" />} tone="destructive" />
         <StatCard label="Total registos" value={String(vendas.length)} icon={<Receipt className="h-4 w-4" />} />
       </div>
+
+      <RelatorioVendasActions vendas={filtered} />
+
+
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">
@@ -935,7 +1014,21 @@ function Historico() {
               )}
             </div>
           )}
+          {detalhe && (
+            <DialogFooter className="gap-2 sm:gap-2">
+              <ReciboActions
+                venda={detalhe}
+                itens={itensDetalhe.map((it) => ({
+                  nome: it.nome_produto,
+                  quantidade: Number(it.quantidade),
+                  preco: Number(it.preco_unitario),
+                  subtotal: Number(it.subtotal),
+                }))}
+              />
+            </DialogFooter>
+          )}
         </DialogContent>
+
       </Dialog>
 
       <AlertDialog open={!!cancelar} onOpenChange={(o) => !o && setCancelar(null)}>
@@ -961,7 +1054,61 @@ function Historico() {
   );
 }
 
+/** Exporta ou imprime o relatório da lista de vendas filtrada. */
+function RelatorioVendasActions({ vendas }: { vendas: Venda[] }) {
+  const [busy, setBusy] = useState<"pdf" | "print" | null>(null);
+
+  const run = async (acao: "pdf" | "print") => {
+    if (vendas.length === 0) {
+      toast.error("Sem vendas para exportar");
+      return;
+    }
+    setBusy(acao);
+    try {
+      const empresa = await getEmpresaDoc();
+      const cur = empresa.config?.moeda ?? "MZN";
+      const totalPagas = vendas.filter((v) => v.status === "paga").reduce((s, v) => s + Number(v.total), 0);
+      const doc = criarRelatorioPdf(empresa, {
+        titulo: "Relatório de Vendas",
+        subtitulo: `${vendas.length} registo(s)`,
+        colunas: ["Nº", "Data", "Tipo", "Mesa", "Pagamento", "Estado", "Total"],
+        linhas: vendas.map((v) => [
+          `#${v.numero}`,
+          format(new Date(v.created_at), "dd/MM/yyyy HH:mm"),
+          v.tipo,
+          v.mesa ?? "-",
+          v.metodo_pagamento ?? "-",
+          v.status,
+          moeda(Number(v.total), cur),
+        ]),
+        resumo: [
+          { label: "Total de vendas pagas", valor: moeda(totalPagas, cur) },
+          { label: "Registos apresentados", valor: String(vendas.length) },
+        ],
+      });
+      if (acao === "print") imprimirPdf(doc);
+      else doc.save(nomeFicheiro("relatorio-vendas"));
+    } catch (e) {
+      toast.error((e as Error).message || "Falha ao gerar o relatório");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run("pdf")}>
+        <FileDown className="mr-2 h-4 w-4" />Exportar PDF
+      </Button>
+      <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run("print")}>
+        <Printer className="mr-2 h-4 w-4" />Imprimir relatório
+      </Button>
+    </div>
+  );
+}
+
 function StatCard({
+
   label, value, sub, icon, tone,
 }: { label: string; value: string; sub?: string; icon?: React.ReactNode; tone?: "primary" | "destructive" }) {
   return (
