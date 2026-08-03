@@ -162,10 +162,11 @@ export function criarReciboPdf(empresa: EmpresaDoc, venda: ReciboVenda, itens: R
   center(`Emitido em ${dataHora()}`, 6);
 
   // Ajusta a altura da página ao conteúdo.
-  const pdf = new jsPDF({ unit: "mm", format: [W, Math.max(60, y + 6)] });
-  // @ts-expect-error — reutiliza o conteúdo desenhado
-  pdf.internal.pages = doc.internal.pages;
-  return pdf;
+  const alturaFinal = Math.max(60, y + 6);
+  const size = doc.internal.pageSize as unknown as { height: number; getHeight: () => number };
+  size.height = alturaFinal;
+  return doc;
+
 }
 
 /* =========================== RELATÓRIO =========================== */
