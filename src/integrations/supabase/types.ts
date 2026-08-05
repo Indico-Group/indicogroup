@@ -189,6 +189,9 @@ export type Database = {
           notificacoes_caixa: boolean
           notificacoes_estoque: boolean
           prefixo_recibo: string | null
+          recibo_densidade: string
+          recibo_margem_mm: number | null
+          recibo_modelo: string
           rodape_recibo: string | null
           telefone: string | null
           tema: string
@@ -209,6 +212,9 @@ export type Database = {
           notificacoes_caixa?: boolean
           notificacoes_estoque?: boolean
           prefixo_recibo?: string | null
+          recibo_densidade?: string
+          recibo_margem_mm?: number | null
+          recibo_modelo?: string
           rodape_recibo?: string | null
           telefone?: string | null
           tema?: string
@@ -229,6 +235,9 @@ export type Database = {
           notificacoes_caixa?: boolean
           notificacoes_estoque?: boolean
           prefixo_recibo?: string | null
+          recibo_densidade?: string
+          recibo_margem_mm?: number | null
+          recibo_modelo?: string
           rodape_recibo?: string | null
           telefone?: string | null
           tema?: string
