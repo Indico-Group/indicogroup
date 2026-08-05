@@ -10,10 +10,10 @@ import { formatDistanceToNow, format } from "date-fns";
 import { pt } from "date-fns/locale";
 
 import { supabase } from "@/integrations/supabase/client";
-import { useEmpresa } from "@/hooks/use-empresa";
+import { useEmpresa, type ReciboModelo } from "@/hooks/use-empresa";
 import {
   getEmpresaDoc, criarReciboPdf, criarRelatorioPdf, imprimirPdf, nomeFicheiro, moeda,
-  type ReciboItem, type ReciboVenda,
+  type ReciboItem, type ReciboVenda, type ReciboOpcoes,
 } from "@/lib/pdf";
 
 import { PageHeader } from "@/components/page-header";
