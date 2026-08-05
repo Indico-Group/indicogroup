@@ -283,6 +283,75 @@ export type Database = {
         }
         Relationships: []
       }
+      funcionarios: {
+        Row: {
+          admitido_em: string | null
+          cargo: string | null
+          codigo: string | null
+          created_at: string
+          desconto_percent: number
+          documento: string | null
+          email: string | null
+          foto_url: string | null
+          id: string
+          is_active: boolean
+          morada: string | null
+          nome: string
+          notas: string | null
+          saiu_em: string | null
+          salario_base: number
+          subsidios: number
+          telefone: string | null
+          turno: string | null
+          updated_at: string
+          valor_hora_extra: number
+        }
+        Insert: {
+          admitido_em?: string | null
+          cargo?: string | null
+          codigo?: string | null
+          created_at?: string
+          desconto_percent?: number
+          documento?: string | null
+          email?: string | null
+          foto_url?: string | null
+          id?: string
+          is_active?: boolean
+          morada?: string | null
+          nome: string
+          notas?: string | null
+          saiu_em?: string | null
+          salario_base?: number
+          subsidios?: number
+          telefone?: string | null
+          turno?: string | null
+          updated_at?: string
+          valor_hora_extra?: number
+        }
+        Update: {
+          admitido_em?: string | null
+          cargo?: string | null
+          codigo?: string | null
+          created_at?: string
+          desconto_percent?: number
+          documento?: string | null
+          email?: string | null
+          foto_url?: string | null
+          id?: string
+          is_active?: boolean
+          morada?: string | null
+          nome?: string
+          notas?: string | null
+          saiu_em?: string | null
+          salario_base?: number
+          subsidios?: number
+          telefone?: string | null
+          turno?: string | null
+          updated_at?: string
+          valor_hora_extra?: number
+        }
+        Relationships: []
+      }
       movimentos_estoque: {
         Row: {
           created_at: string
@@ -326,6 +395,53 @@ export type Database = {
             columns: ["produto_id"]
             isOneToOne: false
             referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      presencas: {
+        Row: {
+          created_at: string
+          data: string
+          estado: Database["public"]["Enums"]["presenca_estado"]
+          funcionario_id: string
+          horas: number
+          horas_extra: number
+          id: string
+          observacoes: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          estado?: Database["public"]["Enums"]["presenca_estado"]
+          funcionario_id: string
+          horas?: number
+          horas_extra?: number
+          id?: string
+          observacoes?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          estado?: Database["public"]["Enums"]["presenca_estado"]
+          funcionario_id?: string
+          horas?: number
+          horas_extra?: number
+          id?: string
+          observacoes?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presencas_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
             referencedColumns: ["id"]
           },
         ]
@@ -677,6 +793,13 @@ export type Database = {
         | "pos"
         | "transferencia"
         | "misto"
+      presenca_estado:
+        | "presente"
+        | "falta"
+        | "falta_justificada"
+        | "ferias"
+        | "folga"
+        | "meio_periodo"
       venda_status: "aberta" | "paga" | "cancelada"
       venda_tipo: "balcao" | "mesa" | "delivery"
     }
@@ -831,6 +954,14 @@ export const Constants = {
         "pos",
         "transferencia",
         "misto",
+      ],
+      presenca_estado: [
+        "presente",
+        "falta",
+        "falta_justificada",
+        "ferias",
+        "folga",
+        "meio_periodo",
       ],
       venda_status: ["aberta", "paga", "cancelada"],
       venda_tipo: ["balcao", "mesa", "delivery"],
