@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { usePermissions } from "@/hooks/use-permissions";
-import { resolveLogoUrl, isExternalUrl } from "@/hooks/use-empresa";
+import { resolveLogoUrl, isExternalUrl, type ReciboModelo, type ReciboDensidade } from "@/hooks/use-empresa";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({
