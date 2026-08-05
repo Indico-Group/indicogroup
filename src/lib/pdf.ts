@@ -87,43 +87,82 @@ export type ReciboItem = {
   subtotal: number;
 };
 
-/** Recibo térmico 80 mm com logotipo e dados da empresa. */
-export function criarReciboPdf(empresa: EmpresaDoc, venda: ReciboVenda, itens: ReciboItem[]) {
+export type ReciboOpcoes = {
+  /** Formato do papel: talão térmico de 80 mm ou folha A4. */
+  modelo?: ReciboModelo;
+  /** Densidade de impressão; "auto" adapta-se ao número de linhas. */
+  densidade?: ReciboDensidade;
+  /** Margem em mm; vazio = calculada automaticamente a partir do modelo/densidade. */
+  margem?: number | null;
+};
+
+type Metrica = { escala: number; margem: number };
+
+/** Resolve densidade e margens (automáticas quando não definidas). */
+function metricas(
+  modelo: ReciboModelo,
+  densidade: ReciboDensidade,
+  margem: number | null | undefined,
+  nLinhas: number,
+): Metrica {
+  const dens: Exclude<ReciboDensidade, "auto"> =
+    densidade !== "auto" ? densidade : nLinhas > 18 ? "compacta" : nLinhas > 8 ? "normal" : "ampla";
+  const escala = dens === "compacta" ? 0.82 : dens === "ampla" ? 1.18 : 1;
+  const base = modelo === "a4" ? 18 : 5;
+  const auto = Math.round(base * (dens === "compacta" ? 0.7 : dens === "ampla" ? 1.25 : 1) * 10) / 10;
+  const m = margem == null || Number.isNaN(margem) ? auto : margem;
+  const max = modelo === "a4" ? 40 : 15;
+  return { escala, margem: Math.min(Math.max(m, 2), max) };
+}
+
+/** Recibo em PDF (térmico 80 mm ou A4) com logotipo e dados da empresa. */
+export function criarReciboPdf(
+  empresa: EmpresaDoc,
+  venda: ReciboVenda,
+  itens: ReciboItem[],
+  opcoes: ReciboOpcoes = {},
+) {
   const { config, logo } = empresa;
   const cur = config?.moeda ?? "MZN";
-  const W = 80;
-  const M = 5;
+  const modelo: ReciboModelo = opcoes.modelo ?? config?.recibo_modelo ?? "termico";
+  const densidade: ReciboDensidade = opcoes.densidade ?? config?.recibo_densidade ?? "auto";
+  const margemCfg = opcoes.margem !== undefined ? opcoes.margem : config?.recibo_margem_mm ?? null;
+  const { escala, margem: M } = metricas(modelo, densidade, margemCfg, itens.length * 2 + 12);
+
+  const W = modelo === "a4" ? 210 : 80;
+  const f = (n: number) => n * (modelo === "a4" ? 1.25 : 1) * escala; // tamanho de letra
+  const g = (n: number) => n * escala; // espaçamento vertical
 
   /** Desenha o recibo e devolve a altura ocupada (mm). */
   const render = (doc: jsPDF) => {
-    let y = 6;
+    let y = M + g(2);
 
     if (logo) {
-      const maxW = 30;
-      const h = Math.min(20, (logo.height / logo.width) * maxW);
+      const maxW = modelo === "a4" ? 45 : 30;
+      const h = Math.min(modelo === "a4" ? 28 : 20, (logo.height / logo.width) * maxW);
       const w = (logo.width / logo.height) * h;
       doc.addImage(logo.dataUrl, logo.format, (W - w) / 2, y, w, h);
-      y += h + 3;
+      y += h + g(3);
     }
 
     const center = (text: string, size = 8, style: "normal" | "bold" = "normal", gap = 4) => {
       doc.setFont("helvetica", style);
-      doc.setFontSize(size);
+      doc.setFontSize(f(size));
       const lines = doc.splitTextToSize(text, W - M * 2);
       doc.text(lines, W / 2, y, { align: "center" });
-      y += gap * lines.length;
+      y += g(gap) * lines.length;
     };
     const line = () => {
       doc.setDrawColor(180);
       doc.line(M, y, W - M, y);
-      y += 3;
+      y += g(3);
     };
     const row = (l: string, r: string, style: "normal" | "bold" = "normal", size = 8) => {
       doc.setFont("helvetica", style);
-      doc.setFontSize(size);
+      doc.setFontSize(f(size));
       doc.text(l, M, y);
       doc.text(r, W - M, y, { align: "right" });
-      y += 4;
+      y += g(size >= 10 ? 5 : 4);
     };
 
     center(config?.nome_empresa ?? "Aldeia Mesa", 11, "bold", 5);
@@ -131,7 +170,7 @@ export function criarReciboPdf(empresa: EmpresaDoc, venda: ReciboVenda, itens: R
     if (config?.morada) center(config.morada, 7);
     if (config?.telefone) center(config.telefone, 7);
     if (config?.email) center(config.email, 7);
-    y += 1;
+    y += g(1);
     line();
     center("COMPROVANTE DE VENDA", 9, "bold", 5);
     if (config?.mensagem_recibo) center(config.mensagem_recibo, 7);
@@ -146,10 +185,10 @@ export function criarReciboPdf(empresa: EmpresaDoc, venda: ReciboVenda, itens: R
 
     for (const it of itens) {
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
+      doc.setFontSize(f(8));
       const nameLines = doc.splitTextToSize(it.nome, W - M * 2);
       doc.text(nameLines, M, y);
-      y += 4 * nameLines.length;
+      y += g(4) * nameLines.length;
       row(`${it.quantidade} x ${moeda(it.preco, cur)}`, moeda(it.subtotal, cur));
     }
     line();
@@ -167,8 +206,14 @@ export function criarReciboPdf(empresa: EmpresaDoc, venda: ReciboVenda, itens: R
     return y;
   };
 
-  // 1.ª passagem: medir a altura necessária; 2.ª: desenhar na página do tamanho exacto.
-  const altura = Math.max(60, render(new jsPDF({ unit: "mm", format: [W, 1000] })) + 6);
+  if (modelo === "a4") {
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    render(doc);
+    return doc;
+  }
+
+  // Térmico — 1.ª passagem: medir a altura; 2.ª: desenhar na página do tamanho exacto.
+  const altura = Math.max(60, render(new jsPDF({ unit: "mm", format: [W, 1000] })) + M);
   const doc = new jsPDF({ unit: "mm", format: [W, altura] });
   render(doc);
   return doc;
