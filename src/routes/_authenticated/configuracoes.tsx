@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { usePermissions } from "@/hooks/use-permissions";
-import { resolveLogoUrl, isExternalUrl } from "@/hooks/use-empresa";
+import { resolveLogoUrl, isExternalUrl, type ReciboModelo, type ReciboDensidade } from "@/hooks/use-empresa";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({
@@ -41,6 +41,9 @@ type Config = {
   mensagem_recibo: string | null;
   rodape_recibo: string | null;
   prefixo_recibo: string | null;
+  recibo_modelo: ReciboModelo | null;
+  recibo_densidade: ReciboDensidade | null;
+  recibo_margem_mm: number | null;
   tempo_sessao_min: number;
   notificacoes_estoque: boolean;
   notificacoes_caixa: boolean;
@@ -95,6 +98,9 @@ function ConfiguracoesPage() {
           mensagem_recibo: payload.mensagem_recibo,
           rodape_recibo: payload.rodape_recibo,
           prefixo_recibo: payload.prefixo_recibo,
+          recibo_modelo: payload.recibo_modelo ?? "termico",
+          recibo_densidade: payload.recibo_densidade ?? "auto",
+          recibo_margem_mm: payload.recibo_margem_mm,
           tempo_sessao_min: payload.tempo_sessao_min,
           notificacoes_estoque: payload.notificacoes_estoque,
           notificacoes_caixa: payload.notificacoes_caixa,
@@ -237,10 +243,47 @@ function ConfiguracoesPage() {
               <CardDescription>Mensagens e prefixos usados nos comprovantes de venda.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2">
+              <Field label="Modelo do recibo">
+                <Select
+                  value={form.recibo_modelo ?? "termico"}
+                  onValueChange={(v) => update("recibo_modelo", v as Config["recibo_modelo"])}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="termico">Térmico 80 mm</SelectItem>
+                    <SelectItem value="a4">Folha A4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Densidade de impressão">
+                <Select
+                  value={form.recibo_densidade ?? "auto"}
+                  onValueChange={(v) => update("recibo_densidade", v as Config["recibo_densidade"])}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">Automática (adapta ao nº de itens)</SelectItem>
+                    <SelectItem value="compacta">Compacta</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="ampla">Ampla</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Margem (mm) — vazio = automática">
+                <Input
+                  type="number"
+                  min={2}
+                  max={40}
+                  placeholder="Automática"
+                  value={form.recibo_margem_mm ?? ""}
+                  onChange={(e) =>
+                    update("recibo_margem_mm", e.target.value === "" ? null : Number(e.target.value))
+                  }
+                />
+              </Field>
               <Field label="Prefixo do recibo">
                 <Input value={form.prefixo_recibo ?? ""} onChange={(e) => update("prefixo_recibo", e.target.value)} />
               </Field>
-              <div />
               <div className="md:col-span-2">
                 <Field label="Mensagem no topo">
                   <Textarea
@@ -259,6 +302,9 @@ function ConfiguracoesPage() {
                   />
                 </Field>
               </div>
+              <p className="text-xs text-muted-foreground md:col-span-2">
+                O logotipo e os dados da empresa (aba Empresa) aparecem sempre no topo do recibo.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
