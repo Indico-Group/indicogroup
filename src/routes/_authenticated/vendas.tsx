@@ -755,14 +755,15 @@ function Receipt2({ venda, itens }: { venda: Venda; itens: CartItem[] }) {
   );
 }
 
-/** Gera o recibo em PDF com os dados e o logotipo configurados na aba Empresa. */
+/** Gera o recibo em PDF com os dados, logotipo e modelo configurados na aba Empresa/Recibos. */
 async function gerarRecibo(
   venda: ReciboVenda,
   itens: ReciboItem[],
   acao: "pdf" | "print",
+  opcoes: ReciboOpcoes = {},
 ) {
   const empresa = await getEmpresaDoc();
-  const doc = criarReciboPdf(empresa, venda, itens);
+  const doc = criarReciboPdf(empresa, venda, itens, opcoes);
   if (acao === "print") imprimirPdf(doc);
   else doc.save(nomeFicheiro(`recibo-${empresa.config?.prefixo_recibo ?? "AM"}-${venda.numero}`));
 }
@@ -774,7 +775,9 @@ function ReciboActions({
   itens: { nome: string; quantidade: number; preco: number; subtotal: number }[];
   clienteNome?: string | null;
 }) {
+  const { config } = useEmpresa();
   const [busy, setBusy] = useState<"pdf" | "print" | null>(null);
+  const [modelo, setModelo] = useState<"config" | ReciboModelo>("config");
 
   const run = async (acao: "pdf" | "print") => {
     setBusy(acao);
@@ -796,6 +799,7 @@ function ReciboActions({
         },
         itens,
         acao,
+        modelo === "config" ? {} : { modelo },
       );
     } catch (e) {
       toast.error((e as Error).message || "Falha ao gerar o recibo");
@@ -804,8 +808,18 @@ function ReciboActions({
     }
   };
 
+  const padrao = config?.recibo_modelo === "a4" ? "A4" : "Térmico";
+
   return (
     <>
+      <Select value={modelo} onValueChange={(v) => setModelo(v as "config" | ReciboModelo)}>
+        <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="config">Modelo padrão ({padrao})</SelectItem>
+          <SelectItem value="termico">Térmico 80 mm</SelectItem>
+          <SelectItem value="a4">Folha A4</SelectItem>
+        </SelectContent>
+      </Select>
       <Button variant="outline" disabled={busy !== null} onClick={() => run("pdf")}>
         <FileDown className="mr-2 h-4 w-4" />{busy === "pdf" ? "A gerar..." : "PDF"}
       </Button>
