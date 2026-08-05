@@ -41,6 +41,9 @@ type Config = {
   mensagem_recibo: string | null;
   rodape_recibo: string | null;
   prefixo_recibo: string | null;
+  recibo_modelo: ReciboModelo | null;
+  recibo_densidade: ReciboDensidade | null;
+  recibo_margem_mm: number | null;
   tempo_sessao_min: number;
   notificacoes_estoque: boolean;
   notificacoes_caixa: boolean;
