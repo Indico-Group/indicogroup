@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 import { supabase } from "@/integrations/supabase/client";
-import { resolveLogoUrl, type EmpresaConfig } from "@/hooks/use-empresa";
+import { resolveLogoUrl, type EmpresaConfig, type ReciboModelo, type ReciboDensidade } from "@/hooks/use-empresa";
 
 export type EmpresaDoc = {
   config: EmpresaConfig | null;
