@@ -13,7 +13,13 @@ export type EmpresaConfig = {
   mensagem_recibo: string | null;
   rodape_recibo: string | null;
   prefixo_recibo: string | null;
+  recibo_modelo: ReciboModelo | null;
+  recibo_densidade: ReciboDensidade | null;
+  recibo_margem_mm: number | null;
 };
+
+export type ReciboModelo = "termico" | "a4";
+export type ReciboDensidade = "auto" | "compacta" | "normal" | "ampla";
 
 export function isExternalUrl(v?: string | null) {
   return !!v && /^https?:\/\//i.test(v);
