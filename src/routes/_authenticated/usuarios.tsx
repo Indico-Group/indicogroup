@@ -387,12 +387,13 @@ function UsuariosPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Remover"
-                          disabled={u.id === meId}
+                          title={u.roles.includes("admin") ? "Administrador protegido" : "Remover"}
+                          disabled={u.id === meId || u.roles.includes("admin")}
                           onClick={() => setConfirmDelete(u)}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
+
                       </div>
                     </TableCell>
                   </TableRow>
