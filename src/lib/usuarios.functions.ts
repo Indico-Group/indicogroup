@@ -25,6 +25,16 @@ async function assertAdmin(supabase: any, userId: string) {
   if (!data) throw new Error("Apenas administradores podem executar esta acção");
 }
 
+/** O sistema tem um único administrador: o primeiro registado. */
+async function assertAdminUnico(supabaseAdmin: any, targetId: string | null, roles: AppRole[]) {
+  if (!roles.includes("admin")) return;
+  const { data } = await supabaseAdmin.from("user_roles").select("user_id").eq("role", "admin");
+  const existente = (data ?? []).map((r: any) => r.user_id);
+  if (existente.length > 0 && (!targetId || !existente.includes(targetId))) {
+    throw new Error("Só pode existir um Administrador no sistema");
+  }
+}
+
 export const listUsuarios = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -82,6 +92,7 @@ export const criarUsuario = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await assertAdminUnico(supabaseAdmin, null, data.roles);
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -131,6 +142,7 @@ export const atualizarUsuario = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await assertAdminUnico(supabaseAdmin, data.id, data.roles);
 
     const { error: pErr } = await supabaseAdmin
       .from("profiles")
