@@ -30,9 +30,6 @@ const loginSchema = z.object({
   password: z.string().min(6, "Senha mínima de 6 caracteres").max(72),
 });
 
-const signupSchema = loginSchema.extend({
-  fullName: z.string().trim().min(2, "Nome muito curto").max(100),
-});
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -66,34 +63,6 @@ function AuthPage() {
     navigate({ to: "/dashboard", replace: true });
   };
 
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const parsed = signupSchema.safeParse({
-      fullName: form.get("fullName"),
-      email: form.get("email"),
-      password: form.get("password"),
-    });
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
-      return;
-    }
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: parsed.data.email,
-      password: parsed.data.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: { full_name: parsed.data.fullName },
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Conta criada. Já podes entrar.");
-  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-hero p-4">
