@@ -23,11 +23,12 @@ export const MODULE_ACCESS = {
   "/compras": ["admin", "gerente", "estoque"],
   "/clientes": ["admin", "gerente", "supervisor", "caixa"],
   "/funcionarios": ["admin", "gerente"],
-  "/usuarios": ["admin"],
   "/relatorios": ["admin", "gerente", "supervisor"],
   "/financeiro": ["admin", "gerente"],
   "/auditoria": ["admin", "gerente"],
-  "/configuracoes": ["admin", "gerente"],
+  // Exclusivo do administrador
+  "/usuarios": ["admin"],
+  "/configuracoes": ["admin"],
   "/instalacao": ["admin"],
   "/backup": ["admin"],
 } satisfies Record<string, AppRole[]>;
@@ -45,10 +46,11 @@ export const ACTIONS = {
   gerirCatalogo: ["admin", "gerente"],
   gerirPessoas: ["admin", "gerente"],
   gerirUtilizadores: ["admin"],
-  gerirConfiguracoes: ["admin", "gerente"],
+  gerirConfiguracoes: ["admin"],
   cancelarVenda: ["admin", "gerente", "supervisor"],
   fecharCaixa: ["admin", "gerente", "supervisor", "caixa"],
 } satisfies Record<string, AppRole[]>;
+
 
 export function canDo(action: keyof typeof ACTIONS, roles: AppRole[]): boolean {
   return roles.some((r) => (ACTIONS[action] as AppRole[]).includes(r));
