@@ -387,12 +387,13 @@ function UsuariosPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Remover"
-                          disabled={u.id === meId}
+                          title={u.roles.includes("admin") ? "Administrador protegido" : "Remover"}
+                          disabled={u.id === meId || u.roles.includes("admin")}
                           onClick={() => setConfirmDelete(u)}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
+
                       </div>
                     </TableCell>
                   </TableRow>
@@ -478,20 +479,31 @@ function UsuariosPage() {
               <div className="grid gap-2 md:grid-cols-2">
                 {ROLE_OPTIONS.map((r) => {
                   const checked = form.roles.includes(r.value);
+                  const editingAdmin = !!editing && editing.roles.includes("admin");
+                  const adminLocked =
+                    r.value === "admin" && (editingAdmin || stats.admins > 0);
                   return (
                     <label
                       key={r.value}
-                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${
-                        checked ? "border-primary bg-primary/5" : "hover:bg-muted"
-                      }`}
+                      className={`flex items-start gap-3 rounded-lg border p-3 transition ${
+                        adminLocked ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+                      } ${checked ? "border-primary bg-primary/5" : "hover:bg-muted"}`}
                     >
-                      <Checkbox checked={checked} onCheckedChange={() => toggleRole(r.value)} />
+                      <Checkbox
+                        checked={checked}
+                        disabled={adminLocked}
+                        onCheckedChange={() => !adminLocked && toggleRole(r.value)}
+                      />
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className={`inline-block h-2 w-2 rounded-full ${ROLE_STYLES[r.value]}`} />
                           <span className="text-sm font-medium">{r.label}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground">{r.desc}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {adminLocked
+                            ? "Administrador único — papel bloqueado pelo sistema."
+                            : r.desc}
+                        </p>
                       </div>
                     </label>
                   );
@@ -504,15 +516,19 @@ function UsuariosPage() {
                 <div>
                   <Label>Utilizador activo</Label>
                   <p className="text-xs text-muted-foreground">
-                    Utilizadores inactivos permanecem no sistema mas não podem operar.
+                    {editing.roles.includes("admin")
+                      ? "O Administrador único permanece sempre activo."
+                      : "Utilizadores inactivos permanecem no sistema mas não podem operar."}
                   </p>
                 </div>
                 <Switch
-                  checked={form.is_active}
+                  checked={editing.roles.includes("admin") ? true : form.is_active}
+                  disabled={editing.roles.includes("admin")}
                   onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))}
                 />
               </div>
             )}
+
           </div>
 
           <DialogFooter>

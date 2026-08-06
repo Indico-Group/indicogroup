@@ -144,6 +144,21 @@ export const atualizarUsuario = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await assertAdminUnico(supabaseAdmin, data.id, data.roles);
 
+    // O Administrador único é intocável: não pode ser rebaixado nem desactivado
+    const { data: rolesActuais } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.id);
+    const eraAdmin = (rolesActuais ?? []).some((r: any) => r.role === "admin");
+    if (eraAdmin) {
+      if (!data.roles.includes("admin")) {
+        throw new Error("O Administrador único não pode ser rebaixado");
+      }
+      if (!data.is_active) {
+        throw new Error("O Administrador único deve permanecer sempre activo");
+      }
+    }
+
     const { error: pErr } = await supabaseAdmin
       .from("profiles")
       .update({
@@ -151,7 +166,7 @@ export const atualizarUsuario = createServerFn({ method: "POST" })
         phone: data.phone ?? null,
         position: data.position ?? null,
         shift: data.shift ?? null,
-        is_active: data.is_active,
+        is_active: eraAdmin ? true : data.is_active,
       })
       .eq("id", data.id);
     if (pErr) throw new Error(pErr.message);
@@ -162,21 +177,9 @@ export const atualizarUsuario = createServerFn({ method: "POST" })
       .insert(data.roles.map((role) => ({ user_id: data.id, role })));
     if (rErr) throw new Error(rErr.message);
 
-    // Prevent last-admin lockout
-    if (!data.roles.includes("admin")) {
-      const { count } = await supabaseAdmin
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "admin");
-      if ((count ?? 0) === 0) {
-        // rollback: re-add admin
-        await supabaseAdmin.from("user_roles").insert({ user_id: data.id, role: "admin" });
-        throw new Error("Não é possível remover o único administrador do sistema");
-      }
-    }
-
     return { ok: true };
   });
+
 
 const resetSchema = z.object({
   id: z.string().uuid(),
@@ -208,20 +211,15 @@ export const removerUsuario = createServerFn({ method: "POST" })
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Prevent removing last admin
+    // O Administrador único nunca pode ser apagado
     const { data: roles } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", data.id);
     if (roles?.some((r) => r.role === "admin")) {
-      const { count } = await supabaseAdmin
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "admin");
-      if ((count ?? 0) <= 1) {
-        throw new Error("Não é possível remover o único administrador");
-      }
+      throw new Error("A conta de Administrador não pode ser removida");
     }
+
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.id);
     if (error) throw new Error(error.message);
