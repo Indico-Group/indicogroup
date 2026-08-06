@@ -211,20 +211,15 @@ export const removerUsuario = createServerFn({ method: "POST" })
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Prevent removing last admin
+    // O Administrador único nunca pode ser apagado
     const { data: roles } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", data.id);
     if (roles?.some((r) => r.role === "admin")) {
-      const { count } = await supabaseAdmin
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "admin");
-      if ((count ?? 0) <= 1) {
-        throw new Error("Não é possível remover o único administrador");
-      }
+      throw new Error("A conta de Administrador não pode ser removida");
     }
+
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.id);
     if (error) throw new Error(error.message);
