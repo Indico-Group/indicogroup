@@ -92,6 +92,7 @@ export const criarUsuario = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await assertAdminUnico(supabaseAdmin, null, data.roles);
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -141,6 +142,7 @@ export const atualizarUsuario = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await assertAdminUnico(supabaseAdmin, data.id, data.roles);
 
     const { error: pErr } = await supabaseAdmin
       .from("profiles")
