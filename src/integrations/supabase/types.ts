@@ -175,6 +175,116 @@ export type Database = {
         }
         Relationships: []
       }
+      compra_itens: {
+        Row: {
+          compra_id: string
+          created_at: string
+          id: string
+          nome_produto: string
+          preco_unitario: number
+          produto_id: string
+          quantidade: number
+          subtotal: number
+        }
+        Insert: {
+          compra_id: string
+          created_at?: string
+          id?: string
+          nome_produto: string
+          preco_unitario: number
+          produto_id: string
+          quantidade: number
+          subtotal: number
+        }
+        Update: {
+          compra_id?: string
+          created_at?: string
+          id?: string
+          nome_produto?: string
+          preco_unitario?: number
+          produto_id?: string
+          quantidade?: number
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compra_itens_compra_id_fkey"
+            columns: ["compra_id"]
+            isOneToOne: false
+            referencedRelation: "compras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compra_itens_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compras: {
+        Row: {
+          cancelada_em: string | null
+          created_at: string
+          data_prevista: string | null
+          desconto: number
+          documento: string | null
+          fornecedor_id: string | null
+          id: string
+          numero: number
+          observacoes: string | null
+          recebida_em: string | null
+          status: Database["public"]["Enums"]["compra_status"]
+          subtotal: number
+          total: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cancelada_em?: string | null
+          created_at?: string
+          data_prevista?: string | null
+          desconto?: number
+          documento?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          recebida_em?: string | null
+          status?: Database["public"]["Enums"]["compra_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cancelada_em?: string | null
+          created_at?: string
+          data_prevista?: string | null
+          desconto?: number
+          documento?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          recebida_em?: string | null
+          status?: Database["public"]["Enums"]["compra_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compras_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configuracoes: {
         Row: {
           email: string | null
@@ -780,6 +890,7 @@ export type Database = {
         | "estoque"
       caixa_movimento_tipo: "entrada" | "saida" | "sangria" | "reforco"
       caixa_status: "aberta" | "fechada"
+      compra_status: "rascunho" | "pendente" | "recebida" | "cancelada"
       movimento_tipo:
         | "compra"
         | "venda"
@@ -940,6 +1051,7 @@ export const Constants = {
       ],
       caixa_movimento_tipo: ["entrada", "saida", "sangria", "reforco"],
       caixa_status: ["aberta", "fechada"],
+      compra_status: ["rascunho", "pendente", "recebida", "cancelada"],
       movimento_tipo: [
         "compra",
         "venda",
