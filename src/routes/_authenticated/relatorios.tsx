@@ -495,6 +495,12 @@ function RelatoriosPage() {
               ) : null}
 
               <div className="flex flex-wrap justify-end gap-2">
+                <Button variant="outline" onClick={() => exportarPreview("csv")}>
+                  <FileText className="mr-2 h-4 w-4" /> CSV
+                </Button>
+                <Button variant="outline" onClick={() => exportarPreview("xlsx")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
                 <Button variant="outline" onClick={() => exportarPreview("print")}>
                   <Printer className="mr-2 h-4 w-4" /> Imprimir
                 </Button>
@@ -502,6 +508,7 @@ function RelatoriosPage() {
                   <FileDown className="mr-2 h-4 w-4" /> Exportar PDF
                 </Button>
               </div>
+
             </div>
           )}
         </DialogContent>
