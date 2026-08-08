@@ -435,10 +435,19 @@ function RelatoriosPage() {
                   <FileDown className="mr-2 h-4 w-4" />
                   {busy === `${tipo}-pdf` ? "A gerar..." : "Exportar PDF"}
                 </Button>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "xlsx")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  {busy === `${tipo}-xlsx` ? "A gerar..." : "Excel"}
+                </Button>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "csv")}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  {busy === `${tipo}-csv` ? "A gerar..." : "CSV"}
+                </Button>
                 <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "print")}>
                   <Printer className="mr-2 h-4 w-4" />
                   {busy === `${tipo}-print` ? "A preparar..." : "Imprimir"}
                 </Button>
+
               </div>
             </CardContent>
           </Card>
