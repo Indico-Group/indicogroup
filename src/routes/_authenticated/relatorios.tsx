@@ -23,6 +23,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   getEmpresaDoc, criarRelatorioPdf, imprimirPdf, nomeFicheiro, moeda, type RelatorioOpts,
 } from "@/lib/pdf";
+import { exportarCsv, exportarXlsx } from "@/lib/exportar";
+
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
