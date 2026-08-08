@@ -329,11 +329,18 @@ function RelatoriosPage() {
     };
   };
 
-  const run = async (tipo: Tipo, acao: "pdf" | "print" | "ver") => {
+  const run = async (tipo: Tipo, acao: "pdf" | "print" | "ver" | "csv" | "xlsx") => {
     setBusy(`${tipo}-${acao}`);
     try {
       if (acao === "ver") {
         setPreview(await build(tipo));
+        return;
+      }
+      if (acao === "csv" || acao === "xlsx") {
+        const opts = await build(tipo);
+        if (acao === "csv") exportarCsv(opts);
+        else exportarXlsx(opts);
+        toast.success(`${opts.titulo} exportado em ${acao.toUpperCase()}`);
         return;
       }
       const [empresa, opts] = await Promise.all([getEmpresaDoc(), build(tipo)]);
@@ -347,9 +354,11 @@ function RelatoriosPage() {
     }
   };
 
-  const exportarPreview = async (acao: "pdf" | "print") => {
+  const exportarPreview = async (acao: "pdf" | "print" | "csv" | "xlsx") => {
     if (!preview) return;
     try {
+      if (acao === "csv") return exportarCsv(preview);
+      if (acao === "xlsx") return exportarXlsx(preview);
       const empresa = await getEmpresaDoc();
       const doc = criarRelatorioPdf(empresa, preview);
       if (acao === "print") imprimirPdf(doc);
@@ -358,6 +367,7 @@ function RelatoriosPage() {
       toast.error((e as Error).message || "Falha ao gerar o relatório");
     }
   };
+
 
   const cards: { tipo: Tipo; titulo: string; desc: string; Icon: typeof BarChart3; usaPeriodo: boolean }[] = [
     { tipo: "vendas", titulo: "Vendas", desc: "Vendas do período com receita, ticket médio, estados e métodos de pagamento.", Icon: ShoppingBag, usaPeriodo: true },
