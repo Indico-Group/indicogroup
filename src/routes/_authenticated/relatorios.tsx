@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   BarChart3, FileDown, Printer, Package, Wallet, Users, ShoppingBag,
-  Truck, ArrowLeftRight, Trophy, BadgeDollarSign, Eye,
+  Truck, ArrowLeftRight, Trophy, BadgeDollarSign, Eye, FileSpreadsheet, FileText,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { format } from "date-fns";
 
