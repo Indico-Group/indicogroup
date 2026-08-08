@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   BarChart3, FileDown, Printer, Package, Wallet, Users, ShoppingBag,
-  Truck, ArrowLeftRight, Trophy, BadgeDollarSign, Eye,
+  Truck, ArrowLeftRight, Trophy, BadgeDollarSign, Eye, FileSpreadsheet, FileText,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -22,6 +23,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   getEmpresaDoc, criarRelatorioPdf, imprimirPdf, nomeFicheiro, moeda, type RelatorioOpts,
 } from "@/lib/pdf";
+import { exportarCsv, exportarXlsx } from "@/lib/exportar";
+
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
@@ -326,11 +329,18 @@ function RelatoriosPage() {
     };
   };
 
-  const run = async (tipo: Tipo, acao: "pdf" | "print" | "ver") => {
+  const run = async (tipo: Tipo, acao: "pdf" | "print" | "ver" | "csv" | "xlsx") => {
     setBusy(`${tipo}-${acao}`);
     try {
       if (acao === "ver") {
         setPreview(await build(tipo));
+        return;
+      }
+      if (acao === "csv" || acao === "xlsx") {
+        const opts = await build(tipo);
+        if (acao === "csv") exportarCsv(opts);
+        else exportarXlsx(opts);
+        toast.success(`${opts.titulo} exportado em ${acao.toUpperCase()}`);
         return;
       }
       const [empresa, opts] = await Promise.all([getEmpresaDoc(), build(tipo)]);
@@ -344,9 +354,11 @@ function RelatoriosPage() {
     }
   };
 
-  const exportarPreview = async (acao: "pdf" | "print") => {
+  const exportarPreview = async (acao: "pdf" | "print" | "csv" | "xlsx") => {
     if (!preview) return;
     try {
+      if (acao === "csv") return exportarCsv(preview);
+      if (acao === "xlsx") return exportarXlsx(preview);
       const empresa = await getEmpresaDoc();
       const doc = criarRelatorioPdf(empresa, preview);
       if (acao === "print") imprimirPdf(doc);
@@ -355,6 +367,7 @@ function RelatoriosPage() {
       toast.error((e as Error).message || "Falha ao gerar o relatório");
     }
   };
+
 
   const cards: { tipo: Tipo; titulo: string; desc: string; Icon: typeof BarChart3; usaPeriodo: boolean }[] = [
     { tipo: "vendas", titulo: "Vendas", desc: "Vendas do período com receita, ticket médio, estados e métodos de pagamento.", Icon: ShoppingBag, usaPeriodo: true },
@@ -422,10 +435,19 @@ function RelatoriosPage() {
                   <FileDown className="mr-2 h-4 w-4" />
                   {busy === `${tipo}-pdf` ? "A gerar..." : "Exportar PDF"}
                 </Button>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "xlsx")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" />
+                  {busy === `${tipo}-xlsx` ? "A gerar..." : "Excel"}
+                </Button>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "csv")}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  {busy === `${tipo}-csv` ? "A gerar..." : "CSV"}
+                </Button>
                 <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "print")}>
                   <Printer className="mr-2 h-4 w-4" />
                   {busy === `${tipo}-print` ? "A preparar..." : "Imprimir"}
                 </Button>
+
               </div>
             </CardContent>
           </Card>
@@ -482,6 +504,12 @@ function RelatoriosPage() {
               ) : null}
 
               <div className="flex flex-wrap justify-end gap-2">
+                <Button variant="outline" onClick={() => exportarPreview("csv")}>
+                  <FileText className="mr-2 h-4 w-4" /> CSV
+                </Button>
+                <Button variant="outline" onClick={() => exportarPreview("xlsx")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
                 <Button variant="outline" onClick={() => exportarPreview("print")}>
                   <Printer className="mr-2 h-4 w-4" /> Imprimir
                 </Button>
@@ -489,6 +517,7 @@ function RelatoriosPage() {
                   <FileDown className="mr-2 h-4 w-4" /> Exportar PDF
                 </Button>
               </div>
+
             </div>
           )}
         </DialogContent>
