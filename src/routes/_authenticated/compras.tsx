@@ -284,6 +284,7 @@ function OrdensTab() {
       };
 
       let compraId: string;
+      let numero: number | null = null;
       if (editing) {
         if (editing.status === "recebida" || editing.status === "cancelada") {
           throw new Error("Compras recebidas ou canceladas não podem ser editadas");
@@ -291,15 +292,17 @@ function OrdensTab() {
         const { error } = await supabase.from("compras").update({ ...payload, status: form.status }).eq("id", editing.id);
         if (error) throw error;
         compraId = editing.id;
+        numero = editing.numero;
         await supabase.from("compra_itens").delete().eq("compra_id", compraId);
       } else {
         const { data, error } = await supabase
           .from("compras")
           .insert({ ...payload, status: form.status })
-          .select("id")
+          .select("id, numero")
           .single();
         if (error) throw error;
         compraId = data.id;
+        numero = data.numero;
       }
 
       const { error: itensError } = await supabase.from("compra_itens").insert(
@@ -313,10 +316,20 @@ function OrdensTab() {
         })),
       );
       if (itensError) throw itensError;
+
+      await registarAuditoria({
+        modulo: "compras",
+        acao: editing ? "actualizar" : "criar",
+        entidade: "ordem de compra",
+        entidade_id: compraId,
+        descricao: `${editing ? "Actualizou" : "Criou"} a ordem de compra #${numero} (${itens.length} item(ns), total ${total})`,
+        detalhes: { numero, status: form.status, subtotal, desconto: Number(form.desconto) || 0, total, itens },
+      });
     },
     onSuccess: () => {
       toast.success(editing ? "Ordem de compra actualizada" : "Ordem de compra criada");
       qc.invalidateQueries({ queryKey: ["compras"] });
+      qc.invalidateQueries({ queryKey: ["auditoria"] });
       setOpen(false);
       resetForm();
     },
@@ -327,12 +340,24 @@ function OrdensTab() {
     mutationFn: async ({ compra, status }: { compra: Compra; status: CompraStatus }) => {
       const { error } = await supabase.from("compras").update({ status }).eq("id", compra.id);
       if (error) throw error;
+      await registarAuditoria({
+        modulo: "compras",
+        acao: status === "recebida" ? "receber" : "cancelar",
+        entidade: "ordem de compra",
+        entidade_id: compra.id,
+        descricao:
+          status === "recebida"
+            ? `Recebeu a ordem de compra #${compra.numero} — estoque actualizado`
+            : `Cancelou a ordem de compra #${compra.numero} (estado anterior: ${compra.status})`,
+        detalhes: { numero: compra.numero, estado_anterior: compra.status, estado_novo: status, total: Number(compra.total) },
+      });
     },
     onSuccess: (_d, v) => {
       toast.success(v.status === "recebida" ? "Compra recebida — estoque actualizado" : "Compra cancelada");
       qc.invalidateQueries({ queryKey: ["compras"] });
       qc.invalidateQueries({ queryKey: ["produtos"] });
       qc.invalidateQueries({ queryKey: ["movimentos"] });
+      qc.invalidateQueries({ queryKey: ["auditoria"] });
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao actualizar estado"),
   });
@@ -342,13 +367,111 @@ function OrdensTab() {
       if (compra.status === "recebida") throw new Error("Não é possível apagar uma compra recebida");
       const { error } = await supabase.from("compras").delete().eq("id", compra.id);
       if (error) throw error;
+      await registarAuditoria({
+        modulo: "compras",
+        acao: "apagar",
+        entidade: "ordem de compra",
+        entidade_id: compra.id,
+        descricao: `Apagou a ordem de compra #${compra.numero}`,
+        detalhes: { numero: compra.numero, estado: compra.status, total: Number(compra.total) },
+      });
     },
     onSuccess: () => {
       toast.success("Ordem de compra apagada");
       qc.invalidateQueries({ queryKey: ["compras"] });
+      qc.invalidateQueries({ queryKey: ["auditoria"] });
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao apagar"),
   });
+
+  /* ---------------------- Exportações (PDF / CSV) ---------------------- */
+
+  const colunasOrdens = ["Nº", "Data", "Fornecedor", "Documento", "Estado", "Subtotal", "Desconto", "Total"];
+  const linhasOrdens = () =>
+    filtered.map((c) => [
+      `#${c.numero}`,
+      format(new Date(c.created_at), "dd/MM/yyyy", { locale: pt }),
+      c.fornecedor_id ? fornMap.get(c.fornecedor_id) ?? "—" : "—",
+      c.documento ?? "—",
+      STATUS_META[c.status].label,
+      Number(c.subtotal).toFixed(2),
+      Number(c.desconto).toFixed(2),
+      Number(c.total).toFixed(2),
+    ]);
+
+  const exportarOrdens = async (modo: "pdf" | "imprimir" | "csv") => {
+    if (filtered.length === 0) return toast.error("Sem ordens para exportar");
+    const linhas = linhasOrdens();
+    if (modo === "csv") {
+      exportarCsv("compras-ordens", colunasOrdens, linhas);
+    } else {
+      try {
+        const empresa = await getEmpresaDoc();
+        const doc = criarRelatorioPdf(empresa, {
+          titulo: "Ordens de Compra",
+          subtitulo: `${filtered.length} ordem(ns) · Total ${fmt(filtered.reduce((s, c) => s + Number(c.total), 0))}`,
+          colunas: colunasOrdens,
+          linhas,
+          resumo: [{ label: "Total geral", valor: fmt(filtered.reduce((s, c) => s + Number(c.total), 0)) }],
+          orientacao: "landscape",
+        });
+        if (modo === "imprimir") imprimirPdf(doc);
+        else doc.save(nomeFicheiro("ordens-de-compra"));
+      } catch (e: any) {
+        return toast.error(e?.message ?? "Erro ao gerar PDF");
+      }
+    }
+    registarAuditoria({
+      modulo: "compras",
+      acao: "exportar",
+      entidade: "ordens de compra",
+      descricao: `Exportou ${filtered.length} ordem(ns) de compra em ${modo === "csv" ? "CSV" : "PDF"}`,
+      detalhes: { formato: modo, filtro_estado: statusFilter, pesquisa: search || null },
+    });
+  };
+
+  const exportarItens = async (compra: Compra, modo: "pdf" | "imprimir" | "csv") => {
+    const { data, error } = await supabase
+      .from("compra_itens").select("*").eq("compra_id", compra.id).order("created_at");
+    if (error || !data?.length) return toast.error("Sem itens para exportar");
+    const colunas = ["Produto", "Quantidade", "Preço unitário", "Subtotal"];
+    const linhas = data.map((i: any) => [
+      i.nome_produto,
+      Number(i.quantidade).toString(),
+      Number(i.preco_unitario).toFixed(2),
+      Number(i.subtotal).toFixed(2),
+    ]);
+    if (modo === "csv") {
+      exportarCsv(`compra-${compra.numero}-itens`, colunas, linhas);
+    } else {
+      try {
+        const empresa = await getEmpresaDoc();
+        const doc = criarRelatorioPdf(empresa, {
+          titulo: `Ordem de Compra #${compra.numero}`,
+          subtitulo: `${compra.fornecedor_id ? fornMap.get(compra.fornecedor_id) ?? "Sem fornecedor" : "Sem fornecedor"} · ${STATUS_META[compra.status].label}`,
+          colunas,
+          linhas,
+          resumo: [
+            { label: "Subtotal", valor: fmt(Number(compra.subtotal)) },
+            { label: "Desconto", valor: fmt(Number(compra.desconto)) },
+            { label: "Total", valor: fmt(Number(compra.total)) },
+          ],
+        });
+        if (modo === "imprimir") imprimirPdf(doc);
+        else doc.save(nomeFicheiro(`compra-${compra.numero}`));
+      } catch (e: any) {
+        return toast.error(e?.message ?? "Erro ao gerar PDF");
+      }
+    }
+    registarAuditoria({
+      modulo: "compras",
+      acao: "exportar",
+      entidade: "itens da ordem",
+      entidade_id: compra.id,
+      descricao: `Exportou os itens da ordem #${compra.numero} em ${modo === "csv" ? "CSV" : "PDF"}`,
+      detalhes: { numero: compra.numero, formato: modo, itens: data.length },
+    });
+  };
 
   return (
     <div className="space-y-6">
