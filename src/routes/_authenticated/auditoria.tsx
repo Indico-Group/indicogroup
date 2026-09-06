@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Search, FileDown, Printer, Sheet, ShieldCheck, Activity, Users } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { registarAuditoria as _unused, exportarCsv } from "@/lib/auditoria";
+import { exportarCsv } from "@/lib/auditoria";
 import { getEmpresaDoc, criarRelatorioPdf, imprimirPdf, nomeFicheiro } from "@/lib/pdf";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
