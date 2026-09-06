@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      auditoria: {
+        Row: {
+          acao: string
+          created_at: string
+          descricao: string | null
+          detalhes: Json | null
+          entidade: string | null
+          entidade_id: string | null
+          id: string
+          modulo: string
+          user_id: string | null
+          user_nome: string | null
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          descricao?: string | null
+          detalhes?: Json | null
+          entidade?: string | null
+          entidade_id?: string | null
+          id?: string
+          modulo: string
+          user_id?: string | null
+          user_nome?: string | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          descricao?: string | null
+          detalhes?: Json | null
+          entidade?: string | null
+          entidade_id?: string | null
+          id?: string
+          modulo?: string
+          user_id?: string | null
+          user_nome?: string | null
+        }
+        Relationships: []
+      }
       caixa_movimentos: {
         Row: {
           created_at: string
