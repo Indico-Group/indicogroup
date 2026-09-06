@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, Search, Trash2, Truck, Pencil, PackageCheck, XCircle, ShoppingBasket, Clock, FileText,
+  FileDown, Printer, Sheet,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -10,6 +11,8 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 
 import { supabase } from "@/integrations/supabase/client";
+import { registarAuditoria, exportarCsv } from "@/lib/auditoria";
+import { getEmpresaDoc, criarRelatorioPdf, imprimirPdf, nomeFicheiro } from "@/lib/pdf";
 import { useEmpresa } from "@/hooks/use-empresa";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
