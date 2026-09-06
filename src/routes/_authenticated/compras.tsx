@@ -502,9 +502,20 @@ function OrdensTab() {
             <SelectItem value="cancelada">Cancelada</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={openNova}>
-          <Plus className="mr-2 h-4 w-4" /> Nova ordem
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon" title="Exportar ordens em CSV" onClick={() => exportarOrdens("csv")}>
+            <Sheet className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" title="Exportar ordens em PDF" onClick={() => exportarOrdens("pdf")}>
+            <FileDown className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" title="Imprimir ordens" onClick={() => exportarOrdens("imprimir")}>
+            <Printer className="h-4 w-4" />
+          </Button>
+          <Button onClick={openNova}>
+            <Plus className="mr-2 h-4 w-4" /> Nova ordem
+          </Button>
+        </div>
       </div>
 
       <Card>
