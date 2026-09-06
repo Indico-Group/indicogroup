@@ -758,6 +758,19 @@ function OrdensTab() {
             <div className="flex justify-between text-base font-bold"><span>Total</span><span>{fmt(Number(detalhe?.total ?? 0))}</span></div>
           </div>
           {detalhe?.observacoes && <p className="text-sm text-muted-foreground">{detalhe.observacoes}</p>}
+          {detalhe && (
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => exportarItens(detalhe, "csv")}>
+                <Sheet className="mr-2 h-4 w-4" /> CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => exportarItens(detalhe, "pdf")}>
+                <FileDown className="mr-2 h-4 w-4" /> PDF
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => exportarItens(detalhe, "imprimir")}>
+                <Printer className="mr-2 h-4 w-4" /> Imprimir
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
