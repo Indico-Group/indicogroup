@@ -396,6 +396,115 @@ export type Database = {
         }
         Relationships: []
       }
+      financeiro_categorias: {
+        Row: {
+          cor: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          nome: string
+          tipo: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nome: string
+          tipo: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nome?: string
+          tipo?: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      financeiro_lancamentos: {
+        Row: {
+          categoria_id: string | null
+          cliente_id: string | null
+          created_at: string
+          descricao: string
+          documento: string | null
+          fornecedor_id: string | null
+          id: string
+          metodo: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes: string | null
+          pago_em: string | null
+          status: Database["public"]["Enums"]["financeiro_status"]
+          tipo: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at: string
+          user_id: string | null
+          valor: number
+          vencimento: string
+        }
+        Insert: {
+          categoria_id?: string | null
+          cliente_id?: string | null
+          created_at?: string
+          descricao: string
+          documento?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes?: string | null
+          pago_em?: string | null
+          status?: Database["public"]["Enums"]["financeiro_status"]
+          tipo: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+          vencimento?: string
+        }
+        Update: {
+          categoria_id?: string | null
+          cliente_id?: string | null
+          created_at?: string
+          descricao?: string
+          documento?: string | null
+          fornecedor_id?: string | null
+          id?: string
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"] | null
+          observacoes?: string | null
+          pago_em?: string | null
+          status?: Database["public"]["Enums"]["financeiro_status"]
+          tipo?: Database["public"]["Enums"]["financeiro_tipo"]
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+          vencimento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financeiro_lancamentos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "financeiro_categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_lancamentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_lancamentos_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fornecedores: {
         Row: {
           contacto: string | null
@@ -930,6 +1039,8 @@ export type Database = {
       caixa_movimento_tipo: "entrada" | "saida" | "sangria" | "reforco"
       caixa_status: "aberta" | "fechada"
       compra_status: "rascunho" | "pendente" | "recebida" | "cancelada"
+      financeiro_status: "pendente" | "pago" | "cancelado"
+      financeiro_tipo: "receita" | "despesa"
       movimento_tipo:
         | "compra"
         | "venda"
@@ -1091,6 +1202,8 @@ export const Constants = {
       caixa_movimento_tipo: ["entrada", "saida", "sangria", "reforco"],
       caixa_status: ["aberta", "fechada"],
       compra_status: ["rascunho", "pendente", "recebida", "cancelada"],
+      financeiro_status: ["pendente", "pago", "cancelado"],
+      financeiro_tipo: ["receita", "despesa"],
       movimento_tipo: [
         "compra",
         "venda",
