@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      adiantamentos: {
+        Row: {
+          created_at: string
+          data: string
+          funcionario_id: string
+          id: string
+          mes_referencia: string
+          motivo: string | null
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          funcionario_id: string
+          id?: string
+          mes_referencia: string
+          motivo?: string | null
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          funcionario_id?: string
+          id?: string
+          mes_referencia?: string
+          motivo?: string | null
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adiantamentos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auditoria: {
         Row: {
           acao: string
@@ -505,6 +546,193 @@ export type Database = {
           },
         ]
       }
+      folha_itens: {
+        Row: {
+          adiantamentos: number
+          atrasos: number
+          bonus: number
+          cargo: string | null
+          codigo: string | null
+          created_at: string
+          departamento: string | null
+          desconto_faltas: number
+          dias_presentes: number
+          estabelecimento: string | null
+          faltas_injustificadas: number
+          faltas_justificadas: number
+          folha_id: string
+          funcionario_id: string
+          horas_extra: number
+          id: string
+          lancamento_id: string | null
+          liquido: number
+          metodo_pagamento:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          nome_funcionario: string
+          observacoes: string | null
+          outros_descontos: number
+          pago_em: string | null
+          referencia_pagamento: string | null
+          salario_base: number
+          status_pagamento: string
+          subsidios: number
+          updated_at: string
+          valor_dia: number
+          valor_horas_extra: number
+        }
+        Insert: {
+          adiantamentos?: number
+          atrasos?: number
+          bonus?: number
+          cargo?: string | null
+          codigo?: string | null
+          created_at?: string
+          departamento?: string | null
+          desconto_faltas?: number
+          dias_presentes?: number
+          estabelecimento?: string | null
+          faltas_injustificadas?: number
+          faltas_justificadas?: number
+          folha_id: string
+          funcionario_id: string
+          horas_extra?: number
+          id?: string
+          lancamento_id?: string | null
+          liquido?: number
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          nome_funcionario: string
+          observacoes?: string | null
+          outros_descontos?: number
+          pago_em?: string | null
+          referencia_pagamento?: string | null
+          salario_base?: number
+          status_pagamento?: string
+          subsidios?: number
+          updated_at?: string
+          valor_dia?: number
+          valor_horas_extra?: number
+        }
+        Update: {
+          adiantamentos?: number
+          atrasos?: number
+          bonus?: number
+          cargo?: string | null
+          codigo?: string | null
+          created_at?: string
+          departamento?: string | null
+          desconto_faltas?: number
+          dias_presentes?: number
+          estabelecimento?: string | null
+          faltas_injustificadas?: number
+          faltas_justificadas?: number
+          folha_id?: string
+          funcionario_id?: string
+          horas_extra?: number
+          id?: string
+          lancamento_id?: string | null
+          liquido?: number
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          nome_funcionario?: string
+          observacoes?: string | null
+          outros_descontos?: number
+          pago_em?: string | null
+          referencia_pagamento?: string | null
+          salario_base?: number
+          status_pagamento?: string
+          subsidios?: number
+          updated_at?: string
+          valor_dia?: number
+          valor_horas_extra?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folha_itens_folha_id_fkey"
+            columns: ["folha_id"]
+            isOneToOne: false
+            referencedRelation: "folhas_salariais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folha_itens_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folha_itens_lancamento_id_fkey"
+            columns: ["lancamento_id"]
+            isOneToOne: false
+            referencedRelation: "financeiro_lancamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folhas_salariais: {
+        Row: {
+          aprovada_em: string | null
+          aprovada_por: string | null
+          created_at: string
+          dias_base: number
+          fechada_em: string | null
+          fechada_por: string | null
+          id: string
+          mes: string
+          observacoes: string | null
+          status: Database["public"]["Enums"]["folha_status"]
+          total_base: number
+          total_descontos: number
+          total_extras: number
+          total_liquido: number
+          total_subsidios: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          aprovada_em?: string | null
+          aprovada_por?: string | null
+          created_at?: string
+          dias_base?: number
+          fechada_em?: string | null
+          fechada_por?: string | null
+          id?: string
+          mes: string
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["folha_status"]
+          total_base?: number
+          total_descontos?: number
+          total_extras?: number
+          total_liquido?: number
+          total_subsidios?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          aprovada_em?: string | null
+          aprovada_por?: string | null
+          created_at?: string
+          dias_base?: number
+          fechada_em?: string | null
+          fechada_por?: string | null
+          id?: string
+          mes?: string
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["folha_status"]
+          total_base?: number
+          total_descontos?: number
+          total_extras?: number
+          total_liquido?: number
+          total_subsidios?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       fornecedores: {
         Row: {
           contacto: string | null
@@ -541,69 +769,149 @@ export type Database = {
         }
         Relationships: []
       }
+      funcionario_salario_historico: {
+        Row: {
+          bonus_anterior: number | null
+          bonus_novo: number | null
+          created_at: string
+          funcionario_id: string
+          id: string
+          motivo: string | null
+          salario_anterior: number | null
+          salario_novo: number | null
+          subsidios_anterior: number | null
+          subsidios_novo: number | null
+          user_id: string | null
+        }
+        Insert: {
+          bonus_anterior?: number | null
+          bonus_novo?: number | null
+          created_at?: string
+          funcionario_id: string
+          id?: string
+          motivo?: string | null
+          salario_anterior?: number | null
+          salario_novo?: number | null
+          subsidios_anterior?: number | null
+          subsidios_novo?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          bonus_anterior?: number | null
+          bonus_novo?: number | null
+          created_at?: string
+          funcionario_id?: string
+          id?: string
+          motivo?: string | null
+          salario_anterior?: number | null
+          salario_novo?: number | null
+          subsidios_anterior?: number | null
+          subsidios_novo?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionario_salario_historico_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       funcionarios: {
         Row: {
           admitido_em: string | null
+          bonus: number
           cargo: string | null
           codigo: string | null
           created_at: string
+          departamento: string | null
+          desconta_faltas: boolean
           desconto_percent: number
           documento: string | null
           email: string | null
+          estabelecimento: string | null
           foto_url: string | null
           id: string
           is_active: boolean
+          jornada: string | null
+          metodo_pagamento:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
           morada: string | null
           nome: string
           notas: string | null
+          outros_descontos: number
           saiu_em: string | null
           salario_base: number
           subsidios: number
           telefone: string | null
+          tipo_contrato: string | null
           turno: string | null
           updated_at: string
           valor_hora_extra: number
         }
         Insert: {
           admitido_em?: string | null
+          bonus?: number
           cargo?: string | null
           codigo?: string | null
           created_at?: string
+          departamento?: string | null
+          desconta_faltas?: boolean
           desconto_percent?: number
           documento?: string | null
           email?: string | null
+          estabelecimento?: string | null
           foto_url?: string | null
           id?: string
           is_active?: boolean
+          jornada?: string | null
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
           morada?: string | null
           nome: string
           notas?: string | null
+          outros_descontos?: number
           saiu_em?: string | null
           salario_base?: number
           subsidios?: number
           telefone?: string | null
+          tipo_contrato?: string | null
           turno?: string | null
           updated_at?: string
           valor_hora_extra?: number
         }
         Update: {
           admitido_em?: string | null
+          bonus?: number
           cargo?: string | null
           codigo?: string | null
           created_at?: string
+          departamento?: string | null
+          desconta_faltas?: boolean
           desconto_percent?: number
           documento?: string | null
           email?: string | null
+          estabelecimento?: string | null
           foto_url?: string | null
           id?: string
           is_active?: boolean
+          jornada?: string | null
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
           morada?: string | null
           nome?: string
           notas?: string | null
+          outros_descontos?: number
           saiu_em?: string | null
           salario_base?: number
           subsidios?: number
           telefone?: string | null
+          tipo_contrato?: string | null
           turno?: string | null
           updated_at?: string
           valor_hora_extra?: number
@@ -659,6 +967,8 @@ export type Database = {
       }
       presencas: {
         Row: {
+          aprovado_em: string | null
+          aprovado_por: string | null
           created_at: string
           data: string
           estado: Database["public"]["Enums"]["presenca_estado"]
@@ -666,11 +976,16 @@ export type Database = {
           horas: number
           horas_extra: number
           id: string
+          justificacao: string | null
+          justificacao_estado: string | null
+          minutos_atraso: number
           observacoes: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
           created_at?: string
           data?: string
           estado?: Database["public"]["Enums"]["presenca_estado"]
@@ -678,11 +993,16 @@ export type Database = {
           horas?: number
           horas_extra?: number
           id?: string
+          justificacao?: string | null
+          justificacao_estado?: string | null
+          minutos_atraso?: number
           observacoes?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
           created_at?: string
           data?: string
           estado?: Database["public"]["Enums"]["presenca_estado"]
@@ -690,6 +1010,9 @@ export type Database = {
           horas?: number
           horas_extra?: number
           id?: string
+          justificacao?: string | null
+          justificacao_estado?: string | null
+          minutos_atraso?: number
           observacoes?: string | null
           updated_at?: string
           user_id?: string | null
@@ -1011,6 +1334,7 @@ export type Database = {
           resultado: string
         }[]
       }
+      gerar_folha: { Args: { p_mes: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1041,6 +1365,7 @@ export type Database = {
       compra_status: "rascunho" | "pendente" | "recebida" | "cancelada"
       financeiro_status: "pendente" | "pago" | "cancelado"
       financeiro_tipo: "receita" | "despesa"
+      folha_status: "rascunho" | "aprovada" | "fechada" | "paga"
       movimento_tipo:
         | "compra"
         | "venda"
@@ -1061,6 +1386,8 @@ export type Database = {
         | "ferias"
         | "folga"
         | "meio_periodo"
+        | "atraso"
+        | "licenca"
       venda_status: "aberta" | "paga" | "cancelada"
       venda_tipo: "balcao" | "mesa" | "delivery"
     }
@@ -1204,6 +1531,7 @@ export const Constants = {
       compra_status: ["rascunho", "pendente", "recebida", "cancelada"],
       financeiro_status: ["pendente", "pago", "cancelado"],
       financeiro_tipo: ["receita", "despesa"],
+      folha_status: ["rascunho", "aprovada", "fechada", "paga"],
       movimento_tipo: [
         "compra",
         "venda",
@@ -1226,6 +1554,8 @@ export const Constants = {
         "ferias",
         "folga",
         "meio_periodo",
+        "atraso",
+        "licenca",
       ],
       venda_status: ["aberta", "paga", "cancelada"],
       venda_tipo: ["balcao", "mesa", "delivery"],
