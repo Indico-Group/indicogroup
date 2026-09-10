@@ -400,7 +400,7 @@ export function criarReciboSalarialPdf(empresa: EmpresaDoc, r: ReciboSalarial) {
     [`Horas extra (${Number(r.horas_extra).toFixed(1)} h)`, r.valor_horas_extra],
     ["Subsídios", r.subsidios],
     ["Bónus", r.bonus],
-  ].filter(([, v]) => Number(v) !== 0 || true) as [string, number][];
+  ];
   const descontos: [string, number][] = [
     [`Faltas injustificadas (${r.faltas_injustificadas} × ${moeda(r.valor_dia, cur)})`, r.desconto_faltas],
     ["Adiantamentos", r.adiantamentos],
