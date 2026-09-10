@@ -16,6 +16,8 @@ import {
   DatabaseBackup,
   History,
   LogOut,
+  BriefcaseBusiness,
+  Receipt,
 } from "lucide-react";
 
 import {
@@ -55,8 +57,13 @@ const catalogo: Item[] = [
 
 const pessoas: Item[] = [
   { title: "Clientes", url: "/clientes", icon: Users },
-  { title: "Funcionários", url: "/funcionarios", icon: UserCog },
   { title: "Usuários", url: "/usuarios", icon: ShieldCheck },
+];
+
+const rh: Item[] = [
+  { title: "Dashboard RH", url: "/rh", icon: BriefcaseBusiness },
+  { title: "Funcionários", url: "/funcionarios", icon: UserCog },
+  { title: "Folha Salarial", url: "/folha-salarial", icon: Receipt },
 ];
 
 const gestao: Item[] = [
@@ -123,6 +130,7 @@ export function AppSidebar() {
         {renderGroup("Operações", operacoes)}
         {renderGroup("Catálogo", catalogo)}
         {renderGroup("Pessoas", pessoas)}
+        {renderGroup("Recursos Humanos", rh)}
         {renderGroup("Gestão", gestao)}
         {renderGroup("Sistema", sistema)}
       </SidebarContent>

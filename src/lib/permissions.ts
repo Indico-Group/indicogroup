@@ -23,6 +23,8 @@ export const MODULE_ACCESS = {
   "/compras": ["admin", "gerente", "estoque"],
   "/clientes": ["admin", "gerente", "supervisor", "caixa"],
   "/funcionarios": ["admin", "gerente"],
+  "/folha-salarial": ["admin", "gerente"],
+  "/rh": ["admin", "gerente"],
   "/relatorios": ["admin", "gerente", "supervisor"],
   "/financeiro": ["admin", "gerente"],
   "/auditoria": ["admin", "gerente"],
@@ -45,6 +47,7 @@ export function canAccess(path: string, roles: AppRole[]): boolean {
 export const ACTIONS = {
   gerirCatalogo: ["admin", "gerente"],
   gerirPessoas: ["admin", "gerente"],
+  gerirRH: ["admin", "gerente"],
   gerirUtilizadores: ["admin"],
   gerirConfiguracoes: ["admin"],
   cancelarVenda: ["admin", "gerente", "supervisor"],
