@@ -312,3 +312,150 @@ export function criarRelatorioPdf(empresa: EmpresaDoc, opts: RelatorioOpts) {
 export function nomeFicheiro(base: string) {
   return `${base.replace(/[^\w-]+/g, "-").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`;
 }
+
+/* ======================= RECIBO SALARIAL ======================= */
+
+export type ReciboSalarial = {
+  mes: string;
+  nome: string;
+  codigo?: string | null;
+  cargo?: string | null;
+  departamento?: string | null;
+  estabelecimento?: string | null;
+  salario_base: number;
+  valor_dia: number;
+  dias_presentes: number;
+  atrasos: number;
+  faltas_justificadas: number;
+  faltas_injustificadas: number;
+  horas_extra: number;
+  valor_horas_extra: number;
+  subsidios: number;
+  bonus: number;
+  desconto_faltas: number;
+  adiantamentos: number;
+  outros_descontos: number;
+  liquido: number;
+  status_pagamento: string;
+  pago_em?: string | null;
+  metodo_pagamento?: string | null;
+  referencia_pagamento?: string | null;
+};
+
+/** Recibo de vencimento A5 com cabeçalho da empresa, vencimentos e descontos. */
+export function criarReciboSalarialPdf(empresa: EmpresaDoc, r: ReciboSalarial) {
+  const { config, logo } = empresa;
+  const cur = config?.moeda ?? "MZN";
+  const doc = new jsPDF({ unit: "mm", format: "a5", orientation: "portrait" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const M = 12;
+  let y = 14;
+
+  if (logo) {
+    const h = 14;
+    const w = Math.min(36, (logo.width / logo.height) * h);
+    doc.addImage(logo.dataUrl, logo.format, M, y - 4, w, h);
+  }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text(config?.nome_empresa ?? "Empresa", pageW - M, y, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  y += 4.5;
+  for (const l of [config?.nif ? `NUIT: ${config.nif}` : null, config?.morada, config?.telefone].filter(Boolean) as string[]) {
+    doc.text(l, pageW - M, y, { align: "right" });
+    y += 3.5;
+  }
+  y += 4;
+  doc.setDrawColor(200);
+  doc.line(M, y, pageW - M, y);
+  y += 7;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text("Recibo de Vencimento", M, y);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(`Mês: ${r.mes.split("-").reverse().join("/")}`, pageW - M, y, { align: "right" });
+  y += 7;
+
+  doc.setFontSize(8.5);
+  const info: [string, string][] = [
+    ["Funcionário", r.nome + (r.codigo ? ` (#${r.codigo})` : "")],
+    ["Cargo", r.cargo ?? "—"],
+    ["Departamento", [r.departamento, r.estabelecimento].filter(Boolean).join(" · ") || "—"],
+    ["Assiduidade", `${r.dias_presentes} dias presentes · ${r.atrasos} atrasos · ${r.faltas_justificadas} F.J. · ${r.faltas_injustificadas} F.I.`],
+  ];
+  for (const [k, v] of info) {
+    doc.setTextColor(110);
+    doc.text(k, M, y);
+    doc.setTextColor(0);
+    doc.text(v, M + 28, y);
+    y += 4.5;
+  }
+  y += 2;
+
+  const vencimentos: [string, number][] = [
+    ["Salário base (30 dias)", r.salario_base],
+    [`Horas extra (${Number(r.horas_extra).toFixed(1)} h)`, r.valor_horas_extra],
+    ["Subsídios", r.subsidios],
+    ["Bónus", r.bonus],
+  ].filter(([, v]) => Number(v) !== 0 || true) as [string, number][];
+  const descontos: [string, number][] = [
+    [`Faltas injustificadas (${r.faltas_injustificadas} × ${moeda(r.valor_dia, cur)})`, r.desconto_faltas],
+    ["Adiantamentos", r.adiantamentos],
+    ["Outros descontos", r.outros_descontos],
+  ];
+  const totalV = vencimentos.reduce((s, [, v]) => s + Number(v), 0);
+  const totalD = descontos.reduce((s, [, v]) => s + Number(v), 0);
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Vencimentos", "Valor"]],
+    body: [...vencimentos.map(([k, v]) => [k, moeda(v, cur)]), [{ content: "Total de vencimentos", styles: { fontStyle: "bold" } }, { content: moeda(totalV, cur), styles: { fontStyle: "bold" } }]],
+    styles: { fontSize: 8, cellPadding: 1.8 },
+    headStyles: { fillColor: [15, 42, 74], textColor: 255 },
+    columnStyles: { 1: { halign: "right", cellWidth: 36 } },
+    margin: { left: M, right: M },
+  });
+  // @ts-expect-error — propriedade adicionada pelo autoTable
+  y = (doc.lastAutoTable?.finalY ?? y) + 4;
+  autoTable(doc, {
+    startY: y,
+    head: [["Descontos", "Valor"]],
+    body: [...descontos.map(([k, v]) => [k, moeda(v, cur)]), [{ content: "Total de descontos", styles: { fontStyle: "bold" } }, { content: moeda(totalD, cur), styles: { fontStyle: "bold" } }]],
+    styles: { fontSize: 8, cellPadding: 1.8 },
+    headStyles: { fillColor: [160, 40, 40], textColor: 255 },
+    columnStyles: { 1: { halign: "right", cellWidth: 36 } },
+    margin: { left: M, right: M },
+  });
+  // @ts-expect-error — propriedade adicionada pelo autoTable
+  y = (doc.lastAutoTable?.finalY ?? y) + 8;
+
+  doc.setFillColor(240, 244, 248);
+  doc.roundedRect(M, y - 5, pageW - 2 * M, 11, 1.5, 1.5, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("Líquido a receber", M + 3, y + 2);
+  doc.text(moeda(r.liquido, cur), pageW - M - 3, y + 2, { align: "right" });
+  y += 14;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(90);
+  const estado =
+    r.status_pagamento === "pago"
+      ? `PAGO em ${r.pago_em ? dataHora(new Date(r.pago_em)) : "—"}${r.metodo_pagamento ? ` · ${r.metodo_pagamento}` : ""}${r.referencia_pagamento ? ` · Ref. ${r.referencia_pagamento}` : ""}`
+      : "Pagamento pendente";
+  doc.text(estado, M, y);
+  y += 16;
+  doc.setDrawColor(150);
+  doc.line(M, y, M + 50, y);
+  doc.line(pageW - M - 50, y, pageW - M, y);
+  doc.setFontSize(7);
+  doc.text("A entidade empregadora", M, y + 4);
+  doc.text("O funcionário", pageW - M - 50, y + 4);
+  doc.text(`Emitido em ${dataHora()}`, M, doc.internal.pageSize.getHeight() - 8);
+  doc.setTextColor(0);
+  return doc;
+}
