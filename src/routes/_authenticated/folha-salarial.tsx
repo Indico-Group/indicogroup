@@ -57,7 +57,8 @@ export const Route = createFileRoute("/_authenticated/folha-salarial")({
 
 function FolhaSalarialPage() {
   const qc = useQueryClient();
-  const { moeda } = useEmpresa();
+  const { config: empresa } = useEmpresa();
+  const moeda = empresa?.moeda ?? "MT";
   const { canDo } = usePermissions();
   const podeGerir = canDo("gerirRH");
 
@@ -147,16 +148,16 @@ function FolhaSalarialPage() {
   const mudarEstado = useMutation({
     mutationFn: async ({ status, observacoes }: { status: FolhaSalarial["status"]; observacoes?: string }) => {
       const { data: u } = await supabase.auth.getUser();
-      const patch: Record<string, unknown> = { status };
-      if (observacoes !== undefined) patch.observacoes = observacoes;
-      if (status === "aprovada") {
-        patch.aprovada_por = u.user?.id ?? null;
-        patch.aprovada_em = new Date().toISOString();
-      }
-      if (status === "fechada") {
-        patch.fechada_por = u.user?.id ?? null;
-        patch.fechada_em = new Date().toISOString();
-      }
+      const patch = {
+        status,
+        ...(observacoes !== undefined ? { observacoes } : {}),
+        ...(status === "aprovada"
+          ? { aprovada_por: u.user?.id ?? null, aprovada_em: new Date().toISOString() }
+          : {}),
+        ...(status === "fechada"
+          ? { fechada_por: u.user?.id ?? null, fechada_em: new Date().toISOString() }
+          : {}),
+      };
       const { error } = await supabase.from("folhas_salariais").update(patch).eq("id", folha!.id);
       if (error) throw error;
       return status;
