@@ -50,7 +50,8 @@ export const Route = createFileRoute("/_authenticated/rh")({
 const TODOS = "__todos__";
 
 function DashboardRhPage() {
-  const { moeda } = useEmpresa();
+  const { config: empresa } = useEmpresa();
+  const moeda = empresa?.moeda ?? "MT";
   const [mes, setMes] = useState(mesAtual());
   const [funcionarioId, setFuncionarioId] = useState(TODOS);
   const [departamento, setDepartamento] = useState(TODOS);
