@@ -437,6 +437,470 @@ export type Database = {
         }
         Relationships: []
       }
+      cotacao_itens: {
+        Row: {
+          codigo: string | null
+          cotacao_id: string
+          created_at: string
+          desconto: number
+          descricao: string
+          id: string
+          imposto_percent: number
+          ordem: number
+          preco_unitario: number
+          produto_id: string | null
+          quantidade: number
+          subtotal: number
+          total: number
+          unidade: string | null
+          valor_imposto: number
+        }
+        Insert: {
+          codigo?: string | null
+          cotacao_id: string
+          created_at?: string
+          desconto?: number
+          descricao: string
+          id?: string
+          imposto_percent?: number
+          ordem?: number
+          preco_unitario?: number
+          produto_id?: string | null
+          quantidade?: number
+          subtotal?: number
+          total?: number
+          unidade?: string | null
+          valor_imposto?: number
+        }
+        Update: {
+          codigo?: string | null
+          cotacao_id?: string
+          created_at?: string
+          desconto?: number
+          descricao?: string
+          id?: string
+          imposto_percent?: number
+          ordem?: number
+          preco_unitario?: number
+          produto_id?: string | null
+          quantidade?: number
+          subtotal?: number
+          total?: number
+          unidade?: string | null
+          valor_imposto?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacao_itens_cotacao_id_fkey"
+            columns: ["cotacao_id"]
+            isOneToOne: false
+            referencedRelation: "cotacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacao_itens_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotacoes: {
+        Row: {
+          cliente_email: string | null
+          cliente_endereco: string | null
+          cliente_id: string | null
+          cliente_nome: string | null
+          cliente_nuit: string | null
+          cliente_telefone: string | null
+          condicoes: string | null
+          convertida_em: string | null
+          created_at: string
+          data: string
+          estabelecimento: string | null
+          fatura_id: string | null
+          forma_pagamento: string | null
+          id: string
+          numero: string
+          observacoes: string | null
+          prazo_entrega: string | null
+          serie: string
+          status: Database["public"]["Enums"]["cotacao_status"]
+          subtotal: number
+          total: number
+          total_desconto: number
+          total_imposto: number
+          updated_at: string
+          user_id: string | null
+          validade: string | null
+          venda_id: string | null
+          vendedor_id: string | null
+          vendedor_nome: string | null
+        }
+        Insert: {
+          cliente_email?: string | null
+          cliente_endereco?: string | null
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          cliente_nuit?: string | null
+          cliente_telefone?: string | null
+          condicoes?: string | null
+          convertida_em?: string | null
+          created_at?: string
+          data?: string
+          estabelecimento?: string | null
+          fatura_id?: string | null
+          forma_pagamento?: string | null
+          id?: string
+          numero: string
+          observacoes?: string | null
+          prazo_entrega?: string | null
+          serie?: string
+          status?: Database["public"]["Enums"]["cotacao_status"]
+          subtotal?: number
+          total?: number
+          total_desconto?: number
+          total_imposto?: number
+          updated_at?: string
+          user_id?: string | null
+          validade?: string | null
+          venda_id?: string | null
+          vendedor_id?: string | null
+          vendedor_nome?: string | null
+        }
+        Update: {
+          cliente_email?: string | null
+          cliente_endereco?: string | null
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          cliente_nuit?: string | null
+          cliente_telefone?: string | null
+          condicoes?: string | null
+          convertida_em?: string | null
+          created_at?: string
+          data?: string
+          estabelecimento?: string | null
+          fatura_id?: string | null
+          forma_pagamento?: string | null
+          id?: string
+          numero?: string
+          observacoes?: string | null
+          prazo_entrega?: string | null
+          serie?: string
+          status?: Database["public"]["Enums"]["cotacao_status"]
+          subtotal?: number
+          total?: number
+          total_desconto?: number
+          total_imposto?: number
+          updated_at?: string
+          user_id?: string | null
+          validade?: string | null
+          venda_id?: string | null
+          vendedor_id?: string | null
+          vendedor_nome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacoes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacoes_fatura_id_fkey"
+            columns: ["fatura_id"]
+            isOneToOne: false
+            referencedRelation: "faturas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotacoes_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documento_series: {
+        Row: {
+          ano: number
+          created_at: string
+          id: string
+          prefixo: string
+          serie: string
+          tipo: string
+          ultimo: number
+        }
+        Insert: {
+          ano: number
+          created_at?: string
+          id?: string
+          prefixo: string
+          serie?: string
+          tipo: string
+          ultimo?: number
+        }
+        Update: {
+          ano?: number
+          created_at?: string
+          id?: string
+          prefixo?: string
+          serie?: string
+          tipo?: string
+          ultimo?: number
+        }
+        Relationships: []
+      }
+      fatura_itens: {
+        Row: {
+          codigo: string | null
+          created_at: string
+          desconto: number
+          descricao: string
+          fatura_id: string
+          id: string
+          imposto_percent: number
+          ordem: number
+          preco_unitario: number
+          produto_id: string | null
+          quantidade: number
+          subtotal: number
+          total: number
+          unidade: string | null
+          valor_imposto: number
+        }
+        Insert: {
+          codigo?: string | null
+          created_at?: string
+          desconto?: number
+          descricao: string
+          fatura_id: string
+          id?: string
+          imposto_percent?: number
+          ordem?: number
+          preco_unitario?: number
+          produto_id?: string | null
+          quantidade?: number
+          subtotal?: number
+          total?: number
+          unidade?: string | null
+          valor_imposto?: number
+        }
+        Update: {
+          codigo?: string | null
+          created_at?: string
+          desconto?: number
+          descricao?: string
+          fatura_id?: string
+          id?: string
+          imposto_percent?: number
+          ordem?: number
+          preco_unitario?: number
+          produto_id?: string | null
+          quantidade?: number
+          subtotal?: number
+          total?: number
+          unidade?: string | null
+          valor_imposto?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fatura_itens_fatura_id_fkey"
+            columns: ["fatura_id"]
+            isOneToOne: false
+            referencedRelation: "faturas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fatura_itens_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fatura_pagamentos: {
+        Row: {
+          created_at: string
+          data: string
+          fatura_id: string
+          id: string
+          lancamento_id: string | null
+          metodo: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia: string | null
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          fatura_id: string
+          id?: string
+          lancamento_id?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia?: string | null
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          fatura_id?: string
+          id?: string
+          lancamento_id?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia?: string | null
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fatura_pagamentos_fatura_id_fkey"
+            columns: ["fatura_id"]
+            isOneToOne: false
+            referencedRelation: "faturas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fatura_pagamentos_lancamento_id_fkey"
+            columns: ["lancamento_id"]
+            isOneToOne: false
+            referencedRelation: "financeiro_lancamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      faturas: {
+        Row: {
+          cancelada_em: string | null
+          cliente_email: string | null
+          cliente_endereco: string | null
+          cliente_id: string | null
+          cliente_nome: string | null
+          cliente_nuit: string | null
+          cliente_telefone: string | null
+          cotacao_id: string | null
+          created_at: string
+          data_emissao: string
+          data_vencimento: string | null
+          emitida_em: string | null
+          estabelecimento: string | null
+          id: string
+          metodo_pagamento:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          motivo_cancelamento: string | null
+          numero: string
+          observacoes: string | null
+          serie: string
+          status: Database["public"]["Enums"]["fatura_status"]
+          subtotal: number
+          total: number
+          total_desconto: number
+          total_imposto: number
+          updated_at: string
+          user_id: string | null
+          valor_pago: number
+          venda_id: string | null
+          vendedor_id: string | null
+          vendedor_nome: string | null
+        }
+        Insert: {
+          cancelada_em?: string | null
+          cliente_email?: string | null
+          cliente_endereco?: string | null
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          cliente_nuit?: string | null
+          cliente_telefone?: string | null
+          cotacao_id?: string | null
+          created_at?: string
+          data_emissao?: string
+          data_vencimento?: string | null
+          emitida_em?: string | null
+          estabelecimento?: string | null
+          id?: string
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          motivo_cancelamento?: string | null
+          numero: string
+          observacoes?: string | null
+          serie?: string
+          status?: Database["public"]["Enums"]["fatura_status"]
+          subtotal?: number
+          total?: number
+          total_desconto?: number
+          total_imposto?: number
+          updated_at?: string
+          user_id?: string | null
+          valor_pago?: number
+          venda_id?: string | null
+          vendedor_id?: string | null
+          vendedor_nome?: string | null
+        }
+        Update: {
+          cancelada_em?: string | null
+          cliente_email?: string | null
+          cliente_endereco?: string | null
+          cliente_id?: string | null
+          cliente_nome?: string | null
+          cliente_nuit?: string | null
+          cliente_telefone?: string | null
+          cotacao_id?: string | null
+          created_at?: string
+          data_emissao?: string
+          data_vencimento?: string | null
+          emitida_em?: string | null
+          estabelecimento?: string | null
+          id?: string
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          motivo_cancelamento?: string | null
+          numero?: string
+          observacoes?: string | null
+          serie?: string
+          status?: Database["public"]["Enums"]["fatura_status"]
+          subtotal?: number
+          total?: number
+          total_desconto?: number
+          total_imposto?: number
+          updated_at?: string
+          user_id?: string | null
+          valor_pago?: number
+          venda_id?: string | null
+          vendedor_id?: string | null
+          vendedor_nome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faturas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faturas_cotacao_fk"
+            columns: ["cotacao_id"]
+            isOneToOne: false
+            referencedRelation: "cotacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faturas_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financeiro_categorias: {
         Row: {
           cor: string | null
@@ -1327,6 +1791,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancelar_fatura: {
+        Args: { p_id: string; p_motivo: string }
+        Returns: undefined
+      }
+      converter_cotacao: {
+        Args: { p_destino: string; p_id: string }
+        Returns: string
+      }
       corrigir_instalacao: {
         Args: never
         Returns: {
@@ -1334,6 +1806,8 @@ export type Database = {
           resultado: string
         }[]
       }
+      doc_pode: { Args: { _acao: string }; Returns: boolean }
+      emitir_fatura: { Args: { p_id: string }; Returns: undefined }
       gerar_folha: { Args: { p_mes: string }; Returns: string }
       has_role: {
         Args: {
@@ -1341,6 +1815,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      proximo_numero_documento: {
+        Args: { _serie: string; _tipo: string }
+        Returns: string
       }
       verificar_instalacao: {
         Args: never
@@ -1363,6 +1841,21 @@ export type Database = {
       caixa_movimento_tipo: "entrada" | "saida" | "sangria" | "reforco"
       caixa_status: "aberta" | "fechada"
       compra_status: "rascunho" | "pendente" | "recebida" | "cancelada"
+      cotacao_status:
+        | "rascunho"
+        | "enviada"
+        | "aceite"
+        | "recusada"
+        | "expirada"
+        | "convertida"
+        | "cancelada"
+      fatura_status:
+        | "rascunho"
+        | "emitida"
+        | "parcial"
+        | "paga"
+        | "vencida"
+        | "cancelada"
       financeiro_status: "pendente" | "pago" | "cancelado"
       financeiro_tipo: "receita" | "despesa"
       folha_status: "rascunho" | "aprovada" | "fechada" | "paga"
@@ -1529,6 +2022,23 @@ export const Constants = {
       caixa_movimento_tipo: ["entrada", "saida", "sangria", "reforco"],
       caixa_status: ["aberta", "fechada"],
       compra_status: ["rascunho", "pendente", "recebida", "cancelada"],
+      cotacao_status: [
+        "rascunho",
+        "enviada",
+        "aceite",
+        "recusada",
+        "expirada",
+        "convertida",
+        "cancelada",
+      ],
+      fatura_status: [
+        "rascunho",
+        "emitida",
+        "parcial",
+        "paga",
+        "vencida",
+        "cancelada",
+      ],
       financeiro_status: ["pendente", "pago", "cancelado"],
       financeiro_tipo: ["receita", "despesa"],
       folha_status: ["rascunho", "aprovada", "fechada", "paga"],
