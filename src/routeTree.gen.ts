@@ -18,6 +18,7 @@ import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticated/produtos'
 import { Route as AuthenticatedInstalacaoRouteImport } from './routes/_authenticated/instalacao'
+import { Route as AuthenticatedHospedagemRouteImport } from './routes/_authenticated/hospedagem'
 import { Route as AuthenticatedFuncionariosRouteImport } from './routes/_authenticated/funcionarios'
 import { Route as AuthenticatedFolhaSalarialRouteImport } from './routes/_authenticated/folha-salarial'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
@@ -73,6 +74,11 @@ const AuthenticatedProdutosRoute = AuthenticatedProdutosRouteImport.update({
 const AuthenticatedInstalacaoRoute = AuthenticatedInstalacaoRouteImport.update({
   id: '/instalacao',
   path: '/instalacao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHospedagemRoute = AuthenticatedHospedagemRouteImport.update({
+  id: '/hospedagem',
+  path: '/hospedagem',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedFuncionariosRoute =
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/folha-salarial': typeof AuthenticatedFolhaSalarialRoute
   '/funcionarios': typeof AuthenticatedFuncionariosRoute
+  '/hospedagem': typeof AuthenticatedHospedagemRoute
   '/instalacao': typeof AuthenticatedInstalacaoRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/folha-salarial': typeof AuthenticatedFolhaSalarialRoute
   '/funcionarios': typeof AuthenticatedFuncionariosRoute
+  '/hospedagem': typeof AuthenticatedHospedagemRoute
   '/instalacao': typeof AuthenticatedInstalacaoRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/folha-salarial': typeof AuthenticatedFolhaSalarialRoute
   '/_authenticated/funcionarios': typeof AuthenticatedFuncionariosRoute
+  '/_authenticated/hospedagem': typeof AuthenticatedHospedagemRoute
   '/_authenticated/instalacao': typeof AuthenticatedInstalacaoRoute
   '/_authenticated/produtos': typeof AuthenticatedProdutosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/folha-salarial'
     | '/funcionarios'
+    | '/hospedagem'
     | '/instalacao'
     | '/produtos'
     | '/relatorios'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/folha-salarial'
     | '/funcionarios'
+    | '/hospedagem'
     | '/instalacao'
     | '/produtos'
     | '/relatorios'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/_authenticated/financeiro'
     | '/_authenticated/folha-salarial'
     | '/_authenticated/funcionarios'
+    | '/_authenticated/hospedagem'
     | '/_authenticated/instalacao'
     | '/_authenticated/produtos'
     | '/_authenticated/relatorios'
@@ -346,6 +358,13 @@ declare module '@tanstack/react-router' {
       path: '/instalacao'
       fullPath: '/instalacao'
       preLoaderRoute: typeof AuthenticatedInstalacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/hospedagem': {
+      id: '/_authenticated/hospedagem'
+      path: '/hospedagem'
+      fullPath: '/hospedagem'
+      preLoaderRoute: typeof AuthenticatedHospedagemRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/funcionarios': {
@@ -448,6 +467,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedFolhaSalarialRoute: typeof AuthenticatedFolhaSalarialRoute
   AuthenticatedFuncionariosRoute: typeof AuthenticatedFuncionariosRoute
+  AuthenticatedHospedagemRoute: typeof AuthenticatedHospedagemRoute
   AuthenticatedInstalacaoRoute: typeof AuthenticatedInstalacaoRoute
   AuthenticatedProdutosRoute: typeof AuthenticatedProdutosRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
@@ -469,6 +489,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedFolhaSalarialRoute: AuthenticatedFolhaSalarialRoute,
   AuthenticatedFuncionariosRoute: AuthenticatedFuncionariosRoute,
+  AuthenticatedHospedagemRoute: AuthenticatedHospedagemRoute,
   AuthenticatedInstalacaoRoute: AuthenticatedInstalacaoRoute,
   AuthenticatedProdutosRoute: AuthenticatedProdutosRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,

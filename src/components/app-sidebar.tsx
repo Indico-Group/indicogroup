@@ -18,6 +18,7 @@ import {
   LogOut,
   BriefcaseBusiness,
   Receipt,
+  BedDouble,
 } from "lucide-react";
 
 import {
@@ -46,6 +47,7 @@ const operacoes: Item[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Vendas", url: "/vendas", icon: ShoppingCart },
   { title: "Caixa", url: "/caixa", icon: Wallet },
+  { title: "Hospedagem", url: "/hospedagem", icon: BedDouble },
 ];
 
 const catalogo: Item[] = [

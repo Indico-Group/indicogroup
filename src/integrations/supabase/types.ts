@@ -1382,6 +1382,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hospedes: {
+        Row: {
+          created_at: string
+          documento: string | null
+          email: string | null
+          endereco: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          documento?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          documento?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       movimentos_estoque: {
         Row: {
           created_at: string
@@ -1605,6 +1641,280 @@ export type Database = {
         }
         Relationships: []
       }
+      quarto_tipos: {
+        Row: {
+          capacidade: number
+          comodidades: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          imagem_url: string | null
+          is_active: boolean
+          nome: string
+          preco: number
+          updated_at: string
+        }
+        Insert: {
+          capacidade?: number
+          comodidades?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          is_active?: boolean
+          nome: string
+          preco?: number
+          updated_at?: string
+        }
+        Update: {
+          capacidade?: number
+          comodidades?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          imagem_url?: string | null
+          is_active?: boolean
+          nome?: string
+          preco?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quartos: {
+        Row: {
+          created_at: string
+          estado: Database["public"]["Enums"]["quarto_estado"]
+          id: string
+          is_active: boolean
+          numero: string
+          observacoes: string | null
+          preco: number | null
+          tipo_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["quarto_estado"]
+          id?: string
+          is_active?: boolean
+          numero: string
+          observacoes?: string | null
+          preco?: number | null
+          tipo_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estado?: Database["public"]["Enums"]["quarto_estado"]
+          id?: string
+          is_active?: boolean
+          numero?: string
+          observacoes?: string | null
+          preco?: number | null
+          tipo_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quartos_tipo_id_fkey"
+            columns: ["tipo_id"]
+            isOneToOne: false
+            referencedRelation: "quarto_tipos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reserva_consumos: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          origem: string
+          preco_unitario: number
+          quantidade: number
+          reserva_id: string
+          total: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          origem?: string
+          preco_unitario?: number
+          quantidade?: number
+          reserva_id: string
+          total?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          origem?: string
+          preco_unitario?: number
+          quantidade?: number
+          reserva_id?: string
+          total?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_consumos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reserva_pagamentos: {
+        Row: {
+          created_at: string
+          id: string
+          lancamento_id: string | null
+          metodo: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia: string | null
+          reserva_id: string
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lancamento_id?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia?: string | null
+          reserva_id: string
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lancamento_id?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"]
+          referencia?: string | null
+          reserva_id?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserva_pagamentos_lancamento_id_fkey"
+            columns: ["lancamento_id"]
+            isOneToOne: false
+            referencedRelation: "financeiro_lancamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reserva_pagamentos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reservas: {
+        Row: {
+          cancelada_em: string | null
+          checkin: string
+          checkin_em: string | null
+          checkout: string
+          checkout_em: string | null
+          created_at: string
+          desconto: number
+          estado: Database["public"]["Enums"]["reserva_estado"]
+          hospede_id: string
+          id: string
+          metodo_pagamento:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          motivo_cancelamento: string | null
+          noites: number
+          num_hospedes: number
+          observacoes: string | null
+          preco_noite: number
+          quarto_id: string
+          total: number
+          total_consumos: number
+          updated_at: string
+          user_id: string | null
+          valor_estadia: number
+          valor_pago: number
+        }
+        Insert: {
+          cancelada_em?: string | null
+          checkin: string
+          checkin_em?: string | null
+          checkout: string
+          checkout_em?: string | null
+          created_at?: string
+          desconto?: number
+          estado?: Database["public"]["Enums"]["reserva_estado"]
+          hospede_id: string
+          id?: string
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          motivo_cancelamento?: string | null
+          noites?: number
+          num_hospedes?: number
+          observacoes?: string | null
+          preco_noite?: number
+          quarto_id: string
+          total?: number
+          total_consumos?: number
+          updated_at?: string
+          user_id?: string | null
+          valor_estadia?: number
+          valor_pago?: number
+        }
+        Update: {
+          cancelada_em?: string | null
+          checkin?: string
+          checkin_em?: string | null
+          checkout?: string
+          checkout_em?: string | null
+          created_at?: string
+          desconto?: number
+          estado?: Database["public"]["Enums"]["reserva_estado"]
+          hospede_id?: string
+          id?: string
+          metodo_pagamento?:
+            | Database["public"]["Enums"]["pagamento_metodo"]
+            | null
+          motivo_cancelamento?: string | null
+          noites?: number
+          num_hospedes?: number
+          observacoes?: string | null
+          preco_noite?: number
+          quarto_id?: string
+          total?: number
+          total_consumos?: number
+          updated_at?: string
+          user_id?: string | null
+          valor_estadia?: number
+          valor_pago?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservas_hospede_id_fkey"
+            columns: ["hospede_id"]
+            isOneToOne: false
+            referencedRelation: "hospedes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservas_quarto_id_fkey"
+            columns: ["quarto_id"]
+            isOneToOne: false
+            referencedRelation: "quartos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1816,9 +2126,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      hosp_pode: { Args: never; Returns: boolean }
       proximo_numero_documento: {
         Args: { _serie: string; _tipo: string }
         Returns: string
+      }
+      reserva_acao: {
+        Args: {
+          p_acao: string
+          p_data?: string
+          p_id: string
+          p_motivo?: string
+        }
+        Returns: undefined
       }
       verificar_instalacao: {
         Args: never
@@ -1881,6 +2201,13 @@ export type Database = {
         | "meio_periodo"
         | "atraso"
         | "licenca"
+      quarto_estado:
+        | "livre"
+        | "reservado"
+        | "ocupado"
+        | "limpeza"
+        | "manutencao"
+      reserva_estado: "reservada" | "checkin" | "checkout" | "cancelada"
       venda_status: "aberta" | "paga" | "cancelada"
       venda_tipo: "balcao" | "mesa" | "delivery"
     }
@@ -2067,6 +2394,8 @@ export const Constants = {
         "atraso",
         "licenca",
       ],
+      quarto_estado: ["livre", "reservado", "ocupado", "limpeza", "manutencao"],
+      reserva_estado: ["reservada", "checkin", "checkout", "cancelada"],
       venda_status: ["aberta", "paga", "cancelada"],
       venda_tipo: ["balcao", "mesa", "delivery"],
     },
