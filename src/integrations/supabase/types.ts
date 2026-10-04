@@ -1731,6 +1731,7 @@ export type Database = {
           id: string
           origem: string
           preco_unitario: number
+          produto_id: string | null
           quantidade: number
           reserva_id: string
           total: number
@@ -1742,6 +1743,7 @@ export type Database = {
           id?: string
           origem?: string
           preco_unitario?: number
+          produto_id?: string | null
           quantidade?: number
           reserva_id: string
           total?: number
@@ -1753,12 +1755,20 @@ export type Database = {
           id?: string
           origem?: string
           preco_unitario?: number
+          produto_id?: string | null
           quantidade?: number
           reserva_id?: string
           total?: number
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reserva_consumos_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reserva_consumos_reserva_id_fkey"
             columns: ["reserva_id"]
