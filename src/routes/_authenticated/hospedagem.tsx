@@ -200,13 +200,9 @@ function Reservas(c: NonNullable<Ctx>) {
                 <TableCell><Badge variant="outline">{ESTADOS_RES[r.estado]}</Badge></TableCell>
                 <TableCell className="space-x-1 whitespace-nowrap text-right">
                   {r.estado === "reservada" && <Button size="sm" variant="outline" onClick={() => acao(r.id, "checkin")}><LogIn className="mr-1 h-3 w-3" />Check-in</Button>}
-                  {["reservada", "checkin"].includes(r.estado) && <Button size="sm" variant="ghost" title="Estender" onClick={() => {
-                    const d = prompt("Nova data de saída (AAAA-MM-DD)", addDias(r.checkout, 1)); if (d) acao(r.id, "estender", { p_data: d });
-                  }}><CalendarPlus className="h-4 w-4" /></Button>}
+                  {["reservada", "checkin"].includes(r.estado) && <Button size="sm" variant="ghost" title="Estender" onClick={() => setDlg({ tipo: "estender", id: r.id, valor: addDias(r.checkout, 1), min: addDias(r.checkout, 1) })}><CalendarPlus className="h-4 w-4" /></Button>}
                   <Button size="sm" variant="ghost" title="Conta / consumos" onClick={() => setConta(r.id)}><Receipt className="h-4 w-4" /></Button>
-                  {r.estado === "reservada" && <Button size="sm" variant="ghost" title="Cancelar" onClick={() => {
-                    const m = prompt("Motivo do cancelamento"); if (m) acao(r.id, "cancelar", { p_motivo: m });
-                  }}><XCircle className="h-4 w-4 text-destructive" /></Button>}
+                  {r.estado === "reservada" && <Button size="sm" variant="ghost" title="Cancelar" onClick={() => setDlg({ tipo: "cancelar", id: r.id, valor: "" })}><XCircle className="h-4 w-4 text-destructive" /></Button>}
                 </TableCell>
               </TableRow>
             ))}
@@ -215,6 +211,24 @@ function Reservas(c: NonNullable<Ctx>) {
       </CardContent>
       {nova && <NovaReserva c={c} onClose={() => setNova(false)} />}
       {conta && <Conta c={c} id={conta} onClose={() => setConta(null)} onAcao={acao} />}
+      <Dialog open={!!dlg} onOpenChange={(o) => !o && setDlg(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{dlg?.tipo === "estender" ? "Estender estadia" : "Cancelar reserva"}</DialogTitle></DialogHeader>
+          {dlg?.tipo === "estender" ? (
+            <div className="space-y-1"><Label>Nova data de saída</Label><Input type="date" min={dlg.min} value={dlg.valor} onChange={(e) => setDlg({ ...dlg, valor: e.target.value })} /></div>
+          ) : dlg ? (
+            <div className="space-y-1"><Label>Motivo do cancelamento</Label><Textarea value={dlg.valor} onChange={(e) => setDlg({ ...dlg, valor: e.target.value })} /></div>
+          ) : null}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDlg(null)}>Voltar</Button>
+            <Button variant={dlg?.tipo === "cancelar" ? "destructive" : "default"} disabled={!dlg?.valor.trim()} onClick={async () => {
+              if (!dlg) return;
+              await acao(dlg.id, dlg.tipo, dlg.tipo === "estender" ? { p_data: dlg.valor } : { p_motivo: dlg.valor.trim() });
+              setDlg(null);
+            }}>Confirmar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
