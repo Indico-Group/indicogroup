@@ -55,16 +55,17 @@ function useDados() {
   return useQuery({
     queryKey: ["hospedagem"],
     queryFn: async () => {
-      const [t, q, h, r, c, p] = await Promise.all([
+      const [t, q, h, r, c, p, pr] = await Promise.all([
         db.from("quarto_tipos").select("*").order("nome"),
         db.from("quartos").select("*").order("numero"),
         db.from("hospedes").select("*").order("nome"),
         db.from("reservas").select("*").order("checkin", { ascending: false }),
         db.from("reserva_consumos").select("*").order("created_at"),
         db.from("reserva_pagamentos").select("*").order("created_at"),
+        db.from("produtos").select("id, nome, preco_venda, estoque_atual").eq("is_active", true).order("nome"),
       ]);
-      for (const x of [t, q, h, r, c, p]) if (x.error) throw x.error;
-      return { tipos: t.data as Row[], quartos: q.data as Row[], hospedes: h.data as Row[], reservas: r.data as Row[], consumos: c.data as Row[], pagamentos: p.data as Row[] };
+      for (const x of [t, q, h, r, c, p, pr]) if (x.error) throw x.error;
+      return { tipos: t.data as Row[], quartos: q.data as Row[], hospedes: h.data as Row[], reservas: r.data as Row[], consumos: c.data as Row[], pagamentos: p.data as Row[], produtos: pr.data as Row[] };
     },
   });
 }
@@ -161,6 +162,7 @@ function Reservas(c: NonNullable<Ctx>) {
   const [nova, setNova] = useState(false);
   const [conta, setConta] = useState<string | null>(null);
   const [filtro, setFiltro] = useState("ativas");
+  const [dlg, setDlg] = useState<{ tipo: "estender" | "cancelar"; id: string; valor: string; min?: string } | null>(null);
   const hosp = (id: string) => c.hospedes.find((h) => h.id === id)?.nome ?? "—";
   const qto = (id: string) => c.quartos.find((h) => h.id === id)?.numero ?? "—";
   const lista = c.reservas.filter((r) => filtro === "todas" || (filtro === "ativas" ? ["reservada", "checkin"].includes(r.estado) : r.estado === filtro));
@@ -273,14 +275,18 @@ function Conta({ c, id, onClose, onAcao }: { c: NonNullable<Ctx>; id: string; on
   const q = c.quartos.find((x) => x.id === r.quarto_id);
   const aberta = ["reservada", "checkin"].includes(r.estado);
   const saldo = Math.round((r.total - r.valor_pago) * 100) / 100;
-  const [cons, setCons] = useState({ origem: "restaurante", descricao: "", quantidade: 1, preco_unitario: 0 });
+  const [cons, setCons] = useState({ origem: "restaurante", produto_id: "", descricao: "", quantidade: 1, preco_unitario: 0 });
   const [pag, setPag] = useState({ valor: 0, metodo: "dinheiro", referencia: "" });
 
   const addConsumo = async () => {
-    if (!cons.descricao) return toast.error("Indique a descrição");
-    const { error } = await db.from("reserva_consumos").insert({ ...cons, reserva_id: id });
+    if (!cons.descricao) return toast.error("Escolha um produto ou indique a descrição");
+    if (cons.quantidade <= 0) return toast.error("Quantidade inválida");
+    const p = c.produtos.find((x) => x.id === cons.produto_id);
+    if (p && Number(p.estoque_atual) < cons.quantidade) return toast.error(`Stock insuficiente de ${p.nome} (${Number(p.estoque_atual)})`);
+    const { error } = await db.from("reserva_consumos").insert({ ...cons, produto_id: cons.produto_id || null, reserva_id: id });
     if (error) return toast.error(error.message);
-    setCons({ ...cons, descricao: "", quantidade: 1, preco_unitario: 0 }); c.refresh();
+    registarAuditoria({ modulo: "Hospedagem", acao: "consumo", entidade: "reservas", entidade_id: id, descricao: `${cons.quantidade} × ${cons.descricao}` });
+    setCons({ ...cons, produto_id: "", descricao: "", quantidade: 1, preco_unitario: 0 }); c.refresh();
   };
   const delConsumo = async (cid: string) => { const { error } = await db.from("reserva_consumos").delete().eq("id", cid); if (error) toast.error(error.message); c.refresh(); };
   const pagar = async () => {
@@ -322,7 +328,14 @@ function Conta({ c, id, onClose, onAcao }: { c: NonNullable<Ctx>; id: string; on
         {aberta && (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
             <select className={sel} value={cons.origem} onChange={(e) => setCons({ ...cons, origem: e.target.value })}><option value="restaurante">Restaurante</option><option value="bar">Bar</option><option value="outros">Outros serviços</option></select>
-            <Input className="sm:col-span-2" placeholder="Descrição" value={cons.descricao} onChange={(e) => setCons({ ...cons, descricao: e.target.value })} />
+            <select className={sel + " sm:col-span-2"} value={cons.produto_id} onChange={(e) => {
+              const p = c.produtos.find((x) => x.id === e.target.value);
+              setCons({ ...cons, produto_id: e.target.value, descricao: p?.nome ?? "", preco_unitario: p ? Number(p.preco_venda) : cons.preco_unitario });
+            }}>
+              <option value="">— Produto do bar/restaurante —</option>
+              {c.produtos.map((p) => <option key={p.id} value={p.id}>{p.nome} ({c.fmt(p.preco_venda)} · stock {Number(p.estoque_atual)})</option>)}
+            </select>
+            <Input className="col-span-2 sm:col-span-3" placeholder="Descrição (serviço livre)" value={cons.descricao} disabled={!!cons.produto_id} onChange={(e) => setCons({ ...cons, descricao: e.target.value })} />
             <Input type="number" placeholder="Qtd" value={cons.quantidade} onChange={(e) => setCons({ ...cons, quantidade: Number(e.target.value) })} />
             <Input type="number" placeholder="Preço" value={cons.preco_unitario} onChange={(e) => setCons({ ...cons, preco_unitario: Number(e.target.value) })} />
             <Button className="col-span-2 sm:col-span-5" variant="outline" onClick={addConsumo}><Plus className="mr-1 h-4 w-4" />Adicionar consumo</Button>
