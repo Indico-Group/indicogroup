@@ -163,7 +163,7 @@ function Editor({ tipo, id, onClose }: { tipo: Tipo; id: string | null; onClose:
       const { data: it } = tipo === "fatura"
         ? await supabase.from("fatura_itens").select("*").eq("fatura_id", id!).order("ordem")
         : await supabase.from("cotacao_itens").select("*").eq("cotacao_id", id!).order("ordem");
-      const r = h as Record<string, string | null>;
+      const r = h as unknown as Record<string, string | null>;
       setCab({ cliente_id: r.cliente_id ?? "", cliente_nome: r.cliente_nome ?? "", cliente_nuit: r.cliente_nuit ?? "", cliente_telefone: r.cliente_telefone ?? "", cliente_email: r.cliente_email ?? "", cliente_endereco: r.cliente_endereco ?? "", vencimento: (tipo === "fatura" ? r.data_vencimento : r.validade) ?? "", observacoes: r.observacoes ?? "", condicoes: r.condicoes ?? "", estabelecimento: r.estabelecimento ?? "" });
       setLinhas((it ?? []).map((i) => ({ produto_id: i.produto_id, descricao: i.descricao, quantidade: Number(i.quantidade), unidade: i.unidade ?? "", preco_unitario: Number(i.preco_unitario), desconto: Number(i.desconto), imposto_percent: Number(i.imposto_percent) })));
       setCarregado(true);
