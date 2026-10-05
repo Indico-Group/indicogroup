@@ -19,6 +19,7 @@ import {
   BriefcaseBusiness,
   Receipt,
   BedDouble,
+  FileText,
 } from "lucide-react";
 
 import {
@@ -48,6 +49,7 @@ const operacoes: Item[] = [
   { title: "Vendas", url: "/vendas", icon: ShoppingCart },
   { title: "Caixa", url: "/caixa", icon: Wallet },
   { title: "Hospedagem", url: "/hospedagem", icon: BedDouble },
+  { title: "Faturas e Cotações", url: "/documentos", icon: FileText },
 ];
 
 const catalogo: Item[] = [

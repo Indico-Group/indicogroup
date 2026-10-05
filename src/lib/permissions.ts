@@ -26,6 +26,7 @@ export const MODULE_ACCESS = {
   "/folha-salarial": ["admin", "gerente"],
   "/rh": ["admin", "gerente"],
   "/hospedagem": ["admin", "gerente", "supervisor", "caixa"],
+  "/documentos": ["admin", "gerente", "supervisor", "caixa"],
   "/relatorios": ["admin", "gerente", "supervisor"],
   "/financeiro": ["admin", "gerente"],
   "/auditoria": ["admin", "gerente"],
