@@ -5,6 +5,8 @@ import {
   Truck, ArrowLeftRight, Trophy, BadgeDollarSign, Eye,
 } from "lucide-react";
 import { toast } from "sonner";
+import { FileText, FileSpreadsheet } from "lucide-react";
+import { exportarCsv } from "@/lib/auditoria";
 import { format } from "date-fns";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -39,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/relatorios")({
 
 type Tipo =
   | "vendas" | "itens" | "produtos" | "movimentos"
-  | "compras" | "caixa" | "clientes" | "salarios";
+  | "compras" | "caixa" | "clientes" | "salarios" | "faturas" | "cotacoes";
 
 const cur = "MZN";
 
@@ -310,6 +312,75 @@ function RelatoriosPage() {
       };
     }
 
+    if (tipo === "faturas") {
+      const { data, error } = await supabase
+        .from("faturas").select("numero, data_emissao, data_vencimento, cliente_nome, status, total, valor_pago, total_imposto")
+        .gte("data_emissao", inicio).lte("data_emissao", fim)
+        .order("data_emissao", { ascending: false });
+      if (error) throw error;
+      const rows = data ?? [];
+      const validas = rows.filter((f) => f.status !== "rascunho" && f.status !== "cancelada");
+      const faturado = validas.reduce((s, f) => s + Number(f.total), 0);
+      const recebido = validas.reduce((s, f) => s + Number(f.valor_pago), 0);
+      return {
+        titulo: "Relatório de Faturas",
+        subtitulo: periodo,
+        orientacao: "landscape",
+        colunas: ["Nº", "Emissão", "Vencimento", "Cliente", "Estado", "Imposto", "Total", "Pago", "Em dívida"],
+        linhas: rows.map((f) => [
+          f.numero,
+          format(new Date(f.data_emissao), "dd/MM/yyyy"),
+          f.data_vencimento ? format(new Date(f.data_vencimento), "dd/MM/yyyy") : "-",
+          f.cliente_nome ?? "-",
+          f.status,
+          moeda(Number(f.total_imposto), cur),
+          moeda(Number(f.total), cur),
+          moeda(Number(f.valor_pago), cur),
+          moeda(Math.max(0, Number(f.total) - Number(f.valor_pago)), cur),
+        ]),
+        resumo: [
+          { label: "Faturas emitidas (válidas)", valor: String(validas.length) },
+          { label: "Total faturado", valor: moeda(faturado, cur) },
+          { label: "Total recebido", valor: moeda(recebido, cur) },
+          { label: "Em dívida", valor: moeda(faturado - recebido, cur) },
+          { label: "Imposto faturado", valor: moeda(validas.reduce((s, f) => s + Number(f.total_imposto), 0), cur) },
+          { label: "Canceladas", valor: String(rows.filter((f) => f.status === "cancelada").length) },
+        ],
+      };
+    }
+
+    if (tipo === "cotacoes") {
+      const { data, error } = await supabase
+        .from("cotacoes").select("numero, data, validade, cliente_nome, status, total")
+        .gte("data", inicio).lte("data", fim)
+        .order("data", { ascending: false });
+      if (error) throw error;
+      const rows = data ?? [];
+      const conta = (s: string) => rows.filter((c) => c.status === s).length;
+      const fechadas = conta("aceite") + conta("convertida");
+      const decididas = fechadas + conta("recusada") + conta("expirada");
+      return {
+        titulo: "Relatório de Cotações",
+        subtitulo: periodo,
+        colunas: ["Nº", "Data", "Validade", "Cliente", "Estado", "Total"],
+        linhas: rows.map((c) => [
+          c.numero,
+          format(new Date(c.data), "dd/MM/yyyy"),
+          c.validade ? format(new Date(c.validade), "dd/MM/yyyy") : "-",
+          c.cliente_nome ?? "-",
+          c.status,
+          moeda(Number(c.total), cur),
+        ]),
+        resumo: [
+          { label: "Cotações", valor: String(rows.length) },
+          { label: "Valor cotado", valor: moeda(rows.filter((c) => c.status !== "cancelada").reduce((s, c) => s + Number(c.total), 0), cur) },
+          { label: "Aceites / convertidas", valor: String(fechadas) },
+          { label: "Recusadas / expiradas", valor: String(conta("recusada") + conta("expirada")) },
+          { label: "Taxa de aceitação", valor: decididas ? `${((fechadas / decididas) * 100).toFixed(1)}%` : "-" },
+        ],
+      };
+    }
+
     const { data, error } = await supabase
       .from("clientes").select("nome, telefone, email, nif, is_active").order("nome");
     if (error) throw error;
@@ -326,11 +397,33 @@ function RelatoriosPage() {
     };
   };
 
-  const run = async (tipo: Tipo, acao: "pdf" | "print" | "ver") => {
+  const exportarDados = (opts: RelatorioOpts, formato: "csv" | "excel") => {
+    const linhas = opts.linhas.map((l) => l.map((c) => (c == null ? "" : String(c))));
+    if (formato === "csv") {
+      exportarCsv(opts.titulo, opts.colunas, linhas);
+      return;
+    }
+    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const resumo = (opts.resumo ?? []).map((r) => `<tr><td><b>${esc(r.label)}</b></td><td>${esc(r.valor)}</td></tr>`).join("");
+    const html = `<html><head><meta charset="utf-8"></head><body><h3>${esc(opts.titulo)}</h3><p>${esc(opts.subtitulo ?? "")}</p><table border="1"><tr>${opts.colunas.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>${linhas.map((l) => `<tr>${l.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</table><br/><table>${resumo}</table></body></html>`;
+    const blob = new Blob(["\uFEFF" + html], { type: "application/vnd.ms-excel" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${opts.titulo.replace(/[^\w-]+/g, "-").toLowerCase()}-${hoje()}.xls`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const run = async (tipo: Tipo, acao: "pdf" | "print" | "ver" | "csv" | "excel") => {
     setBusy(`${tipo}-${acao}`);
     try {
       if (acao === "ver") {
         setPreview(await build(tipo));
+        return;
+      }
+      if (acao === "csv" || acao === "excel") {
+        exportarDados(await build(tipo), acao);
         return;
       }
       const [empresa, opts] = await Promise.all([getEmpresaDoc(), build(tipo)]);
@@ -358,6 +451,8 @@ function RelatoriosPage() {
 
   const cards: { tipo: Tipo; titulo: string; desc: string; Icon: typeof BarChart3; usaPeriodo: boolean }[] = [
     { tipo: "vendas", titulo: "Vendas", desc: "Vendas do período com receita, ticket médio, estados e métodos de pagamento.", Icon: ShoppingBag, usaPeriodo: true },
+    { tipo: "faturas", titulo: "Faturas", desc: "Faturas emitidas no período, valores pagos, em dívida e imposto.", Icon: FileText, usaPeriodo: true },
+    { tipo: "cotacoes", titulo: "Cotações", desc: "Cotações do período por estado, valor cotado e taxa de aceitação.", Icon: FileText, usaPeriodo: true },
     { tipo: "itens", titulo: "Produtos Mais Vendidos", desc: "Ranking por receita e quantidade vendida no período.", Icon: Trophy, usaPeriodo: true },
     { tipo: "produtos", titulo: "Produtos e Estoque", desc: "Posição actual do estoque, preços, valor a custo e alertas de mínimo.", Icon: Package, usaPeriodo: false },
     { tipo: "movimentos", titulo: "Movimentos de Estoque", desc: "Entradas, saídas, ajustes e transferências com motivo.", Icon: ArrowLeftRight, usaPeriodo: true },
@@ -426,6 +521,12 @@ function RelatoriosPage() {
                   <Printer className="mr-2 h-4 w-4" />
                   {busy === `${tipo}-print` ? "A preparar..." : "Imprimir"}
                 </Button>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "excel")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "csv")}>
+                  <FileDown className="mr-2 h-4 w-4" /> CSV
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -482,6 +583,10 @@ function RelatoriosPage() {
               ) : null}
 
               <div className="flex flex-wrap justify-end gap-2">
+                <Button variant="outline" onClick={() => exportarDados(preview, "csv")}>CSV</Button>
+                <Button variant="outline" onClick={() => exportarDados(preview, "excel")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
                 <Button variant="outline" onClick={() => exportarPreview("print")}>
                   <Printer className="mr-2 h-4 w-4" /> Imprimir
                 </Button>
