@@ -15,6 +15,13 @@
       "when": 1791119339121,
       "tag": "0001_consumos_produtos",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791258436099,
+      "tag": "0002_menus_operacionais",
+      "breakpoints": true
     }
   ]
 }

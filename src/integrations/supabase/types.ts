@@ -624,6 +624,83 @@ export type Database = {
           },
         ]
       }
+      devolucoes: {
+        Row: {
+          created_at: string
+          id: string
+          lancamento_id: string | null
+          metodo: Database["public"]["Enums"]["pagamento_metodo"] | null
+          motivo: string
+          nome_produto: string
+          produto_id: string
+          quantidade: number
+          repor_stock: boolean
+          user_id: string | null
+          valor: number
+          venda_id: string
+          venda_item_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lancamento_id?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"] | null
+          motivo: string
+          nome_produto: string
+          produto_id: string
+          quantidade: number
+          repor_stock?: boolean
+          user_id?: string | null
+          valor?: number
+          venda_id: string
+          venda_item_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lancamento_id?: string | null
+          metodo?: Database["public"]["Enums"]["pagamento_metodo"] | null
+          motivo?: string
+          nome_produto?: string
+          produto_id?: string
+          quantidade?: number
+          repor_stock?: boolean
+          user_id?: string | null
+          valor?: number
+          venda_id?: string
+          venda_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devolucoes_lancamento_id_fkey"
+            columns: ["lancamento_id"]
+            isOneToOne: false
+            referencedRelation: "financeiro_lancamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devolucoes_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devolucoes_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devolucoes_venda_item_id_fkey"
+            columns: ["venda_item_id"]
+            isOneToOne: false
+            referencedRelation: "venda_itens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documento_series: {
         Row: {
           ano: number
@@ -1418,6 +1495,36 @@ export type Database = {
         }
         Relationships: []
       }
+      mesas: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          lugares: number
+          numero: string
+          updated_at: string
+          zona: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lugares?: number
+          numero: string
+          updated_at?: string
+          zona?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lugares?: number
+          numero?: string
+          updated_at?: string
+          zona?: string | null
+        }
+        Relationships: []
+      }
       movimentos_estoque: {
         Row: {
           created_at: string
@@ -1925,6 +2032,33 @@ export type Database = {
           },
         ]
       }
+      unidades_medida: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          nome: string
+          sigla: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nome: string
+          sigla: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          nome?: string
+          sigla?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1950,10 +2084,14 @@ export type Database = {
         Row: {
           created_at: string
           desconto: number
+          enviado_em: string | null
+          estado_cozinha: string
           id: string
           nome_produto: string
+          observacao: string | null
           preco_unitario: number
           produto_id: string
+          pronto_em: string | null
           quantidade: number
           subtotal: number
           venda_id: string
@@ -1961,10 +2099,14 @@ export type Database = {
         Insert: {
           created_at?: string
           desconto?: number
+          enviado_em?: string | null
+          estado_cozinha?: string
           id?: string
           nome_produto: string
+          observacao?: string | null
           preco_unitario: number
           produto_id: string
+          pronto_em?: string | null
           quantidade: number
           subtotal: number
           venda_id: string
@@ -1972,10 +2114,14 @@ export type Database = {
         Update: {
           created_at?: string
           desconto?: number
+          enviado_em?: string | null
+          estado_cozinha?: string
           id?: string
           nome_produto?: string
+          observacao?: string | null
           preco_unitario?: number
           produto_id?: string
+          pronto_em?: string | null
           quantidade?: number
           subtotal?: number
           venda_id?: string
