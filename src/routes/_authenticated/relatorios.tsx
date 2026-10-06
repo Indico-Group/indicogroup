@@ -5,6 +5,8 @@ import {
   Truck, ArrowLeftRight, Trophy, BadgeDollarSign, Eye,
 } from "lucide-react";
 import { toast } from "sonner";
+import { FileText, FileSpreadsheet } from "lucide-react";
+import { exportarCsv } from "@/lib/auditoria";
 import { format } from "date-fns";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -519,6 +521,12 @@ function RelatoriosPage() {
                   <Printer className="mr-2 h-4 w-4" />
                   {busy === `${tipo}-print` ? "A preparar..." : "Imprimir"}
                 </Button>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "excel")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => run(tipo, "csv")}>
+                  <FileDown className="mr-2 h-4 w-4" /> CSV
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -575,6 +583,10 @@ function RelatoriosPage() {
               ) : null}
 
               <div className="flex flex-wrap justify-end gap-2">
+                <Button variant="outline" onClick={() => exportarDados(preview, "csv")}>CSV</Button>
+                <Button variant="outline" onClick={() => exportarDados(preview, "excel")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel
+                </Button>
                 <Button variant="outline" onClick={() => exportarPreview("print")}>
                   <Printer className="mr-2 h-4 w-4" /> Imprimir
                 </Button>
