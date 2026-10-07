@@ -20,6 +20,10 @@ import {
   Receipt,
   BedDouble,
   FileText,
+  Utensils,
+  ChefHat,
+  Undo2,
+  Ruler,
 } from "lucide-react";
 
 import {
@@ -50,11 +54,15 @@ const operacoes: Item[] = [
   { title: "Caixa", url: "/caixa", icon: Wallet },
   { title: "Hospedagem", url: "/hospedagem", icon: BedDouble },
   { title: "Faturas e Cotações", url: "/documentos", icon: FileText },
+  { title: "Mesas", url: "/mesas", icon: Utensils },
+  { title: "Cozinha", url: "/cozinha", icon: ChefHat },
+  { title: "Devoluções", url: "/devolucoes", icon: Undo2 },
 ];
 
 const catalogo: Item[] = [
   { title: "Produtos", url: "/produtos", icon: Package },
   { title: "Categorias", url: "/categorias", icon: Tags },
+  { title: "Unidades de medida", url: "/unidades", icon: Ruler },
   { title: "Estoque", url: "/estoque", icon: Boxes },
   { title: "Compras", url: "/compras", icon: Truck },
 ];
