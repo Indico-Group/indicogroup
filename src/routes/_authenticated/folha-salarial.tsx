@@ -177,48 +177,16 @@ function FolhaSalarialPage() {
 
   const pagar = useMutation({
     mutationFn: async (item: FolhaItem) => {
-      const agora = new Date().toISOString();
-      const { data: lanc, error: e1 } = await supabase
-        .from("financeiro_lancamentos")
-        .insert({
-          descricao: `Salário ${mesLabel(mes)} — ${item.nome_funcionario}`,
-          tipo: "despesa",
-          status: "pago",
-          valor: Number(item.liquido),
-          vencimento: agora.slice(0, 10),
-          pago_em: agora,
-          metodo,
-          documento: referencia || null,
-          observacoes: `Folha salarial ${mes}`,
-        })
-        .select("id")
-        .single();
-      if (e1) throw e1;
-
-      const { error: e2 } = await supabase
-        .from("folha_itens")
-        .update({
-          status_pagamento: "pago",
-          pago_em: agora,
-          metodo_pagamento: metodo,
-          referencia_pagamento: referencia || null,
-          lancamento_id: lanc.id,
-        })
-        .eq("id", item.id);
-      if (e2) throw e2;
-
-      // Se todos pagos, marca a folha como paga
-      const { data: pendentes } = await supabase
-        .from("folha_itens")
-        .select("id")
-        .eq("folha_id", item.folha_id)
-        .neq("status_pagamento", "pago");
-      if (!pendentes || pendentes.length === 0) {
-        await supabase.from("folhas_salariais").update({ status: "paga" }).eq("id", item.folha_id);
-      }
-      return item;
+      if (!item.id || !item.folha_id) throw new Error("Item salarial inválido.");
+      const { data, error } = await supabase.rpc("pagar_item_folha", {
+        p_item_id: item.id,
+        p_metodo: metodo,
+        p_referencia: referencia.trim() || null,
+      });
+      if (error) throw error;
+      return { item, lancamentoId: data as string };
     },
-    onSuccess: (item) => {
+    onSuccess: ({ item }) => {
       toast.success(`Pagamento de ${item.nome_funcionario} registado`);
       registarAuditoria({
         modulo: "RH", acao: "pagar", entidade: "folha_itens", entidade_id: item.id,

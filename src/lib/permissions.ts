@@ -45,7 +45,9 @@ export type ModulePath = keyof typeof MODULE_ACCESS;
 
 export function canAccess(path: string, roles: AppRole[]): boolean {
   const allowed = (MODULE_ACCESS as Record<string, AppRole[]>)[path];
-  if (!allowed) return true;
+  // Fail closed: rotas sem regra explícita ficam bloqueadas por defeito.
+  // Adicione cada novo módulo a MODULE_ACCESS antes de o disponibilizar.
+  if (!allowed) return false;
   return roles.some((r) => allowed.includes(r));
 }
 
