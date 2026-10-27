@@ -147,23 +147,35 @@ export type Calculo = {
 export function calcularSalario(f: Funcionario, presencas: Presenca[], mes: string): Calculo {
   const diasUteis = diasDoMes(mes);
   const valorDia = Number(f.salario_base || 0) / diasUteis;
+  const limiteDia = diasDecorridos(mes);
+  const primeiroDiaEmprego = f.admitido_em?.startsWith(mes) ? Number(f.admitido_em.slice(8, 10)) : 1;
+  const ultimoDiaEmprego = f.saiu_em?.startsWith(mes)
+    ? Math.min(limiteDia, Number(f.saiu_em.slice(8, 10)))
+    : limiteDia;
+  const diasEsperados = Math.max(0, ultimoDiaEmprego - primeiroDiaEmprego + 1);
+  const presencasConsideradas = presencas.filter(
+    (p) => p.data >= `${mes}-${pad(primeiroDiaEmprego)}` && p.data <= `${mes}-${pad(ultimoDiaEmprego)}`,
+  );
 
   let diasPagos = 0;
+  let diasNaoPagosRegistados = 0;
   let faltas = 0;
   let presentes = 0;
   let horasExtra = 0;
 
-  for (const p of presencas) {
+  for (const p of presencasConsideradas) {
     const info = estadoInfo(p.estado);
     diasPagos += info.factor;
+    diasNaoPagosRegistados += 1 - info.factor;
     if (info.factor === 0) faltas += 1;
     if (p.estado === "presente" || p.estado === "meio_periodo") presentes += 1;
     horasExtra += Number(p.horas_extra || 0);
   }
 
   // Ausência de registo é pendência, nunca presença confirmada.
-  const diasSemRegisto = Math.max(0, diasDecorridos(mes) - presencas.length);
-  const descontoFaltas = Math.max(0, (diasUteis - diasPagos) * valorDia);
+  const diasSemRegisto = Math.max(0, diasEsperados - presencasConsideradas.length);
+  // Só faltas efectivamente registadas podem gerar desconto; dias pendentes não geram desconto automático.
+  const descontoFaltas = Math.max(0, diasNaoPagosRegistados * valorDia);
   const extras = horasExtra * Number(f.valor_hora_extra || 0);
   const bruto = Number(f.salario_base || 0) + Number(f.subsidios || 0);
   const base = bruto - descontoFaltas + extras;
