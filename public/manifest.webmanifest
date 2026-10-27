@@ -1,0 +1,14 @@
+{
+  "id": "/",
+  "name": "INDICO GROUP — Sistema de Gestão",
+  "short_name": "INDICO GROUP",
+  "description": "Sistema de gestão comercial INDICO GROUP.",
+  "lang": "pt-MZ",
+  "start_url": "/auth",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f8fafc",
+  "theme_color": "#0b1f3a",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
