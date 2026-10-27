@@ -28,10 +28,10 @@ import {
 export const Route = createFileRoute("/_authenticated/relatorios")({
   head: () => ({
     meta: [
-      { title: "Relatórios — Aldeia Mesa" },
-      { name: "description", content: "Relatórios de vendas, produtos vendidos, estoque, compras, caixa, clientes e salários em PDF, com pré-visualização e impressão directa." },
-      { property: "og:title", content: "Relatórios — Aldeia Mesa" },
-      { property: "og:description", content: "Gere, pré-visualize e imprima relatórios do bar e restaurante com o logotipo e dados da empresa." },
+      { title: "Relatórios — INDICO GROUP" },
+      { name: "description", content: "Relatórios operacionais e financeiros do INDICO GROUP com filtros por período, pré-visualização e exportação." },
+      { property: "og:title", content: "Relatórios — INDICO GROUP" },
+      { property: "og:description", content: "Analise os resultados e exporte relatórios em PDF, Excel ou CSV." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

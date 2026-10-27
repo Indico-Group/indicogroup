@@ -11,8 +11,8 @@ interface LogoProps {
 }
 
 /**
- * Logotipo Aldeia Mesa — usa o logotipo carregado nas Configurações quando existe,
- * caso contrário mostra o losango dourado com talheres cruzados.
+ * Logotipo do INDICO GROUP. Nas áreas autenticadas respeita o logotipo configurado;
+ * nos ecrãs públicos usa a identidade padrão do sistema.
  */
 export function Logo({ size = "md", showText = true, variant = "light", staticOnly = false }: LogoProps) {
   const { config, logoUrl } = useEmpresa();
@@ -25,7 +25,7 @@ export function Logo({ size = "md", showText = true, variant = "light", staticOn
 
   const titleColor = variant === "light" ? "text-sidebar-foreground" : "text-foreground";
   const subColor = variant === "light" ? "text-sidebar-foreground/60" : "text-muted-foreground";
-  const nome = (!staticOnly && config?.nome_empresa) || "Aldeia Mesa";
+  const nome = (!staticOnly && config?.nome_empresa) || "INDICO GROUP";
   const showImage = !staticOnly && !!logoUrl;
 
   return (
@@ -44,7 +44,7 @@ export function Logo({ size = "md", showText = true, variant = "light", staticOn
       {showText && (
         <div className="flex flex-col leading-tight">
           <span className={`${dims.title} font-bold tracking-tight ${titleColor}`}>{nome}</span>
-          <span className={`${dims.sub} uppercase tracking-widest ${subColor}`}>Gestão Comercial</span>
+          <span className={`${dims.sub} uppercase tracking-widest ${subColor}`}>Sistema Integrado de Gestão</span>
         </div>
       )}
     </div>

@@ -131,6 +131,7 @@ function diasDecorridos(mes: string) {
 export type Calculo = {
   diasUteis: number;
   diasPagos: number;
+  diasSemRegisto: number;
   faltas: number;
   presencas: number;
   horasExtra: number;
@@ -145,26 +146,36 @@ export type Calculo = {
 /** Cálculo do salário mensal a partir das presenças marcadas. */
 export function calcularSalario(f: Funcionario, presencas: Presenca[], mes: string): Calculo {
   const diasUteis = diasDoMes(mes);
-  const valorDia = Number(f.salario_base || 0) / diasUteis;
+  const valorDia = Number(f.salario_base || 0) / 30;
+  const limiteDia = diasDecorridos(mes);
+  const primeiroDiaEmprego = f.admitido_em?.startsWith(mes) ? Number(f.admitido_em.slice(8, 10)) : 1;
+  const ultimoDiaEmprego = f.saiu_em?.startsWith(mes)
+    ? Math.min(limiteDia, Number(f.saiu_em.slice(8, 10)))
+    : limiteDia;
+  const diasEsperados = Math.max(0, ultimoDiaEmprego - primeiroDiaEmprego + 1);
+  const presencasConsideradas = presencas.filter(
+    (p) => p.data >= `${mes}-${pad(primeiroDiaEmprego)}` && p.data <= `${mes}-${pad(ultimoDiaEmprego)}`,
+  );
 
   let diasPagos = 0;
+  let diasNaoPagosRegistados = 0;
   let faltas = 0;
   let presentes = 0;
   let horasExtra = 0;
 
-  for (const p of presencas) {
+  for (const p of presencasConsideradas) {
     const info = estadoInfo(p.estado);
     diasPagos += info.factor;
+    diasNaoPagosRegistados += 1 - info.factor;
     if (info.factor === 0) faltas += 1;
     if (p.estado === "presente" || p.estado === "meio_periodo") presentes += 1;
     horasExtra += Number(p.horas_extra || 0);
   }
 
-  // dias sem registo contam como trabalhados (não penaliza quem ainda não foi marcado)
-  const semRegisto = Math.max(0, diasUteis - presencas.length);
-  diasPagos += semRegisto;
-
-  const descontoFaltas = Math.max(0, (diasUteis - diasPagos) * valorDia);
+  // Ausência de registo é pendência, nunca presença confirmada.
+  const diasSemRegisto = Math.max(0, diasEsperados - presencasConsideradas.length);
+  // Só faltas efectivamente registadas podem gerar desconto; dias pendentes não geram desconto automático.
+  const descontoFaltas = Math.max(0, diasNaoPagosRegistados * valorDia);
   const extras = horasExtra * Number(f.valor_hora_extra || 0);
   const bruto = Number(f.salario_base || 0) + Number(f.subsidios || 0);
   const base = bruto - descontoFaltas + extras;
@@ -173,6 +184,7 @@ export function calcularSalario(f: Funcionario, presencas: Presenca[], mes: stri
   return {
     diasUteis,
     diasPagos,
+    diasSemRegisto,
     faltas,
     presencas: presentes,
     horasExtra,
@@ -715,6 +727,21 @@ function FuncionariosPage() {
             </p>
           </div>
 
+          {folha.some(({ calc }) => calc.diasSemRegisto > 0) && (
+            <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+              <div className="font-semibold text-amber-700 dark:text-amber-400">Assiduidade incompleta — cálculo provisório</div>
+              <p className="mt-1 text-muted-foreground">
+                Existem dias decorridos sem registo de presença, falta, folga, férias ou licença.
+                Estes dias não são presumidos como trabalhados. Complete os registos antes de aprovar a folha salarial.
+              </p>
+              <ul className="mt-2 space-y-1">
+                {folha.filter(({ calc }) => calc.diasSemRegisto > 0).map(({ f, calc }) => (
+                  <li key={f.id}>{f.nome}: {calc.diasSemRegisto} dia(s) sem registo</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Folha salarial — {mes}</CardTitle>
@@ -747,6 +774,11 @@ function FuncionariosPage() {
                         <TableCell>
                           <div className="font-medium">{f.nome}</div>
                           <div className="text-xs text-muted-foreground">{f.cargo ?? "—"}</div>
+                          {calc.diasSemRegisto > 0 && (
+                            <Badge variant="outline" className="mt-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
+                              {calc.diasSemRegisto} dia(s) por registar
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">{fmt(Number(f.salario_base))}</TableCell>
                         <TableCell className="text-right">{fmt(Number(f.subsidios))}</TableCell>

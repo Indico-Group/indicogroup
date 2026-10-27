@@ -1,0 +1,35 @@
+name: Validacao da aplicacao
+
+on:
+  push:
+    branches:
+      - main
+      - feature/comandas-mesas-abertas
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_SUPABASE_URL: https://example.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      VITE_SUPABASE_PROJECT_ID: ci-placeholder-project
+    steps:
+      - name: Obter codigo
+        uses: actions/checkout@v4
+      - name: Configurar Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Instalar dependencias bloqueadas
+        run: bun install --frozen-lockfile
+      - name: Compilar aplicacao
+        run: bun run build
+      - name: Verificar lint
+        run: bun run lint
