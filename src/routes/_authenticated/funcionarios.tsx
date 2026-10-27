@@ -131,6 +131,7 @@ function diasDecorridos(mes: string) {
 export type Calculo = {
   diasUteis: number;
   diasPagos: number;
+  diasSemRegisto: number;
   faltas: number;
   presencas: number;
   horasExtra: number;
@@ -160,10 +161,8 @@ export function calcularSalario(f: Funcionario, presencas: Presenca[], mes: stri
     horasExtra += Number(p.horas_extra || 0);
   }
 
-  // dias sem registo contam como trabalhados (não penaliza quem ainda não foi marcado)
-  const semRegisto = Math.max(0, diasUteis - presencas.length);
-  diasPagos += semRegisto;
-
+  // Ausência de registo é pendência, nunca presença confirmada.
+  const diasSemRegisto = Math.max(0, diasDecorridos(mes) - presencas.length);
   const descontoFaltas = Math.max(0, (diasUteis - diasPagos) * valorDia);
   const extras = horasExtra * Number(f.valor_hora_extra || 0);
   const bruto = Number(f.salario_base || 0) + Number(f.subsidios || 0);
@@ -173,6 +172,7 @@ export function calcularSalario(f: Funcionario, presencas: Presenca[], mes: stri
   return {
     diasUteis,
     diasPagos,
+    diasSemRegisto,
     faltas,
     presencas: presentes,
     horasExtra,
@@ -715,6 +715,21 @@ function FuncionariosPage() {
             </p>
           </div>
 
+          {folha.some(({ calc }) => calc.diasSemRegisto > 0) && (
+            <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+              <div className="font-semibold text-amber-700 dark:text-amber-400">Assiduidade incompleta — cálculo provisório</div>
+              <p className="mt-1 text-muted-foreground">
+                Existem dias decorridos sem registo de presença, falta, folga, férias ou licença.
+                Estes dias não são presumidos como trabalhados. Complete os registos antes de aprovar a folha salarial.
+              </p>
+              <ul className="mt-2 space-y-1">
+                {folha.filter(({ calc }) => calc.diasSemRegisto > 0).map(({ f, calc }) => (
+                  <li key={f.id}>{f.nome}: {calc.diasSemRegisto} dia(s) sem registo</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Folha salarial — {mes}</CardTitle>
@@ -747,6 +762,11 @@ function FuncionariosPage() {
                         <TableCell>
                           <div className="font-medium">{f.nome}</div>
                           <div className="text-xs text-muted-foreground">{f.cargo ?? "—"}</div>
+                          {calc.diasSemRegisto > 0 && (
+                            <Badge variant="outline" className="mt-1 border-amber-500/50 text-amber-700 dark:text-amber-400">
+                              {calc.diasSemRegisto} dia(s) por registar
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">{fmt(Number(f.salario_base))}</TableCell>
                         <TableCell className="text-right">{fmt(Number(f.subsidios))}</TableCell>
