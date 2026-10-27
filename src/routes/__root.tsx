@@ -79,21 +79,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aldeia Mesa — Sistema de Gestão Comercial" },
+      { name: "theme-color", content: "#0b1f3a" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "INDICO GROUP" },
+      { title: "INDICO GROUP — Sistema de Gestão" },
       {
         name: "description",
         content:
           "Sistema profissional de gestão para o Bar e Restaurante Aldeia Mesa: vendas, caixa, estoque, financeiro e relatórios.\nAutor: Dausse de Clune do Rosário",
       },
       { name: "author", content: "Dausse de Clune do Rosário" },
-      { property: "og:title", content: "Aldeia Mesa — Sistema de Gestão Comercial" },
+      { property: "og:title", content: "INDICO GROUP — Sistema de Gestão" },
       {
         property: "og:description",
         content: "Sistema profissional de gestão para o Bar e Restaurante Aldeia Mesa: vendas, caixa, estoque, financeiro e relatórios.\nAutor: Dausse de Clune do Rosário",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Aldeia Mesa — Sistema de Gestão Comercial" },
+      { name: "twitter:title", content: "INDICO GROUP — Sistema de Gestão" },
       { name: "twitter:description", content: "Sistema profissional de gestão para o Bar e Restaurante Aldeia Mesa: vendas, caixa, estoque, financeiro e relatórios.\nAutor: Dausse de Clune do Rosário" },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/NfL26m3S3hRjxkckPQzQg8iPCJO2/social-images/social-1784924083629-1000744361.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/NfL26m3S3hRjxkckPQzQg8iPCJO2/social-images/social-1784924083629-1000744361.webp" },
@@ -101,6 +106,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/icon.svg" },
     ],
   }),
   shellComponent: RootShell,
@@ -111,7 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt">
       <head>
         <HeadContent />
       </head>
@@ -125,6 +133,14 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register("/sw.js").catch((error) => {
+        console.error("[PWA] Não foi possível registar o service worker.", error);
+      });
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
