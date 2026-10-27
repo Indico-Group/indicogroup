@@ -484,6 +484,9 @@ function RelatoriosPage() {
             <Button variant="outline" size="sm" onClick={() => { setInicio(hoje()); setFim(hoje()); }}>Hoje</Button>
             <Button variant="outline" size="sm" onClick={() => { setInicio(format(new Date(Date.now() - 6 * 864e5), "yyyy-MM-dd")); setFim(hoje()); }}>7 dias</Button>
             <Button variant="outline" size="sm" onClick={() => { setInicio(format(new Date(Date.now() - 29 * 864e5), "yyyy-MM-dd")); setFim(hoje()); }}>30 dias</Button>
+            <Button variant="outline" size="sm" onClick={() => { const d = new Date(); setInicio(format(new Date(d.getFullYear(), d.getMonth(), 1), "yyyy-MM-dd")); setFim(hoje()); }}>Mês actual</Button>
+            <Button variant="outline" size="sm" onClick={() => { const d = new Date(); const m = d.getMonth(); const inicioSemestre = new Date(d.getFullYear(), m < 6 ? 0 : 6, 1); setInicio(format(inicioSemestre, "yyyy-MM-dd")); setFim(hoje()); }}>Semestre actual</Button>
+            <Button variant="outline" size="sm" onClick={() => { const d = new Date(); setInicio(format(new Date(d.getFullYear(), 0, 1), "yyyy-MM-dd")); setFim(hoje()); }}>Ano actual</Button>
           </div>
         </CardContent>
       </Card>
