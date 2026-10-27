@@ -146,7 +146,7 @@ export type Calculo = {
 /** Cálculo do salário mensal a partir das presenças marcadas. */
 export function calcularSalario(f: Funcionario, presencas: Presenca[], mes: string): Calculo {
   const diasUteis = diasDoMes(mes);
-  const valorDia = Number(f.salario_base || 0) / diasUteis;
+  const valorDia = Number(f.salario_base || 0) / 30;
   const limiteDia = diasDecorridos(mes);
   const primeiroDiaEmprego = f.admitido_em?.startsWith(mes) ? Number(f.admitido_em.slice(8, 10)) : 1;
   const ultimoDiaEmprego = f.saiu_em?.startsWith(mes)
